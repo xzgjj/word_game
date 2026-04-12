@@ -7,6 +7,7 @@
 - `diff.md`：关键修改记录。
 - `notes.txt`：项目笔记与复核记录。
 - `PROJECT_AUDIT_REPORT.md`：项目完成与审核报告。
+- `RUN_DEBUG_GUIDE.md`：新手运行、查看、调试、画质和素材导入指南。
 - `README.md`：项目概念、运行说明与文件索引。
 - `.gitignore`：忽略生成文件和运行时输出，不能忽略规范与执行文档。
 - `index.html`：网页概念演示入口。
