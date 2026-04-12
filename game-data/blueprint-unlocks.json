@@ -1,0 +1,24 @@
+{
+    "unlocks": [
+        {
+            "trigger": "initial-signboard-open",
+            "grant": ["bridge", "flower-bed", "forest-sign"],
+            "feedback": "木牌赠送三张初始图纸"
+        },
+        {
+            "trigger": "bridge-built",
+            "grant": ["wood-fence", "river-lamp"],
+            "feedback": "木桥修好后，木牌追加庭院和河岸图纸"
+        },
+        {
+            "trigger": "arcade-01-completed",
+            "grant": ["sticker-wall", "arcade-base"],
+            "feedback": "小游戏完成后，木牌追加贴纸墙和游戏机底座图纸"
+        },
+        {
+            "trigger": "built-count-at-least-3",
+            "grant": ["custom-building"],
+            "feedback": "建设 3 个物品后，自建建筑物开启"
+        }
+    ]
+}

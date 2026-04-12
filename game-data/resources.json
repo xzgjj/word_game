@@ -1,12 +1,13 @@
 {
     "resources": [
-        { "id": "wood", "label": "木材", "domain": "旁友森林", "use": ["木桥", "木栅栏", "工作台", "河岸灯"] },
-        { "id": "stone", "label": "石子", "domain": "河岸浅滩", "use": ["花圃", "工作台", "游戏机底座"] },
-        { "id": "flowerSeed", "label": "花种", "domain": "木屋周围", "use": ["花圃"] },
-        { "id": "shell", "label": "河贝", "domain": "河岸", "use": ["风铃", "屋外摆件"] },
-        { "id": "shard", "label": "表情碎片", "domain": "森林与空地", "use": ["林间路牌", "情绪外观"] },
-        { "id": "cartridge", "label": "旧卡带", "domain": "空地游戏机", "use": ["像素小游戏入口"] },
-        { "id": "starCore", "label": "星屑灯芯", "domain": "夜晚河岸", "use": ["河岸灯", "游戏机底座"] },
-        { "id": "sticker", "label": "贴纸", "domain": "像素小游戏", "use": ["贴纸墙"] }
+        { "id": "wood", "label": "木材", "domain": "旁友森林与木屋旁落枝", "use": ["木桥", "木栅栏", "工作台", "基础建筑", "木牌兑换"] },
+        { "id": "stone", "label": "石子", "domain": "河岸与浅滩边缘", "use": ["花圃", "工作台", "游戏机底座", "木牌兑换"] },
+        { "id": "flowerSeed", "label": "花种", "domain": "森林边缘与木屋前草丛", "use": ["花圃", "庭院装饰", "木牌兑换"] },
+        { "id": "riverShell", "label": "河贝", "domain": "河岸和浅水区", "use": ["风铃", "屋外摆件", "木牌兑换"] },
+        { "id": "fish", "label": "鱼", "domain": "河水", "use": ["木牌兑换", "装饰水箱", "后续料理"] },
+        { "id": "emotionShard", "label": "表情碎片", "domain": "木屋前木牌兑换", "use": ["林间路牌", "情绪外观", "贴纸兑换"] },
+        { "id": "oldCartridge", "label": "旧卡带", "domain": "木屋前木牌兑换或首次赠送", "use": ["像素小游戏入口"] },
+        { "id": "starCore", "label": "星屑灯芯", "domain": "木屋前木牌兑换", "use": ["河岸灯", "游戏机底座"] },
+        { "id": "sticker", "label": "贴纸", "domain": "像素小游戏奖励或木牌少量兑换", "use": ["贴纸墙"] }
     ]
 }

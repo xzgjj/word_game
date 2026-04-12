@@ -1,0 +1,22 @@
+{
+    "inventoryRules": {
+        "slotFormula": "inventoryItemCount + 3",
+        "maxStackPerItem": 9999,
+        "blueprintsOccupyInventory": false
+    },
+    "items": [
+        { "id": "wood", "label": "木材", "category": "baseMaterial" },
+        { "id": "stone", "label": "石子", "category": "baseMaterial" },
+        { "id": "flowerSeed", "label": "花种", "category": "baseMaterial" },
+        { "id": "riverShell", "label": "河贝", "category": "baseMaterial" },
+        { "id": "fish", "label": "鱼", "category": "baseMaterial" },
+        { "id": "emotionShard", "label": "表情碎片", "category": "exchangeMaterial" },
+        { "id": "oldCartridge", "label": "旧卡带", "category": "exchangeMaterial" },
+        { "id": "starCore", "label": "星屑灯芯", "category": "exchangeMaterial" },
+        { "id": "sticker", "label": "贴纸", "category": "reward" }
+    ],
+    "computedV2": {
+        "inventoryItemCount": 9,
+        "slotCount": 12
+    }
+}

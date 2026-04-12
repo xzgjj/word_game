@@ -7,13 +7,14 @@
 - `diff.md`：关键修改记录。
 - `notes.txt`：项目笔记与复核记录。
 - `PROJECT_AUDIT_REPORT.md`：项目完成与审核报告。
-- `RUN_DEBUG_GUIDE.md`：新手运行、查看、调试、画质和素材导入指南。
+- `PROJECT_ARCHITECTURE_UPDATE.md`：v2 架构更新，覆盖单主地图、资源、木牌、图纸、自建、物品栏、接口和存档设计。
 - `README.md`：项目概念、运行说明与文件索引。
 - `.gitignore`：忽略生成文件和运行时输出，不能忽略规范与执行文档。
 - `index.html`：网页概念演示入口。
 - `style.css`：概念页视觉样式。
 - `app.js`：概念页交互逻辑。
 - `assets/`：保存图像、像素素材与用户提供资源。
+- `game-data/`：保存可转为 Unity ScriptableObject 的资源、物品、兑换、图纸、建设和世界节点配置。
 - `doc/`：设计文档目录。
 
 ## `doc/` 目录
@@ -26,6 +27,7 @@
 - `visual_alignment_standard.md`：画面对齐方法、80 分通过标准和三轮 review。
 - `unity_newbie_guide.md`：Unity 新手注册、安装、授权和协作指南。
 - `asset_pipeline.md`：素材生成、开源素材和许可证记录流程。
+- `RUN_DEBUG_GUIDE.md`：新手运行、查看、调试、画质和素材导入指南。
 
 ## 后续 Unity 工程建议
 后续实现时建议新增 `unity/` 目录，但本轮只做规划与网页概念演示，不提前创建空工程。
@@ -37,11 +39,18 @@ unity/
       WorldHub.unity
       MiniGame01.unity
     Scripts/
+      Core/GameState.cs
+      Inventory/InventoryService.cs
       Player/PlayerController.cs
       Player/EmotionController.cs
       World/WorldNodeInteractor.cs
-      World/BridgeRepairNode.cs
-      World/ArcadeEntranceNode.cs
+      World/GatherNode.cs
+      World/FishingNode.cs
+      World/SignboardNode.cs
+      Building/BlueprintCatalog.cs
+      Building/BuildService.cs
+      Building/PlacementGrid.cs
+      Building/CustomBuildService.cs
       MiniGame/MiniGameStateMachine.cs
       Save/SaveService.cs
     Art/Emoji/
@@ -50,11 +59,19 @@ unity/
     UI/HudController.cs
 ```
 
+## `game-data/` 目录
+- `item-catalog.json`：物品种类、格子数公式和 9999 上限。
+- `resources.json`：资源类型和来源领域。
+- `exchange-recipes.json`：木屋前木牌兑换配方。
+- `blueprint-unlocks.json`：图纸赠送与自建解锁触发。
+- `build-recipes.json`：建设配方。
+- `world-nodes.json`：主世界交互节点。
+
 ## 架构说明
-- 主世界：小地图，木屋、森林、河流、空地游戏机和远景光幕。
+- 主世界：单主地图，木屋、森林、河岸、河水、空地游戏机和远景光幕都在同一张地图内，并允许持续摆放建设元素。
 - 玩家：动态表情包主角，主世界圆形动态表情，像素小游戏切换为方块表情。
-- 交互：资源拾取、修桥、确认进入游戏机、小游戏完成返回。
-- 状态：`PlayerState` 管理位置、情绪、背包、已解锁小游戏和已完成小游戏。
+- 交互：资源拾取、河水钓鱼、木牌兑换、图纸赠送、修桥、建设、自建建筑物、确认进入游戏机、小游戏完成返回。
+- 状态：`PlayerState` 管理位置、情绪、物品栏、图纸、摆放建筑物、建设数量、已解锁小游戏和已完成小游戏。
 - 存档：桌面版本地 JSON，网页演示 `localStorage`。
 
 ## 技术选型

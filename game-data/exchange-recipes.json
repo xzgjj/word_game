@@ -1,0 +1,36 @@
+{
+    "recipes": [
+        {
+            "id": "exchange-emotion-shard",
+            "label": "兑换表情碎片",
+            "cost": { "wood": 1, "flowerSeed": 1 },
+            "output": { "itemId": "emotionShard", "count": 1 },
+            "unlockCondition": "initial",
+            "feedback": "情绪栏轻闪，表情碎片进入物品栏"
+        },
+        {
+            "id": "exchange-old-cartridge",
+            "label": "兑换旧卡带",
+            "cost": { "riverShell": 1, "fish": 1 },
+            "output": { "itemId": "oldCartridge", "count": 1 },
+            "unlockCondition": "arcade-seen",
+            "feedback": "空地游戏机屏幕亮起"
+        },
+        {
+            "id": "exchange-star-core",
+            "label": "兑换星屑灯芯",
+            "cost": { "stone": 2, "riverShell": 1 },
+            "output": { "itemId": "starCore", "count": 1 },
+            "unlockCondition": "night-signboard-seen",
+            "feedback": "夜晚光点进入物品栏"
+        },
+        {
+            "id": "exchange-sticker",
+            "label": "兑换贴纸",
+            "cost": { "fish": 2, "emotionShard": 1 },
+            "output": { "itemId": "sticker", "count": 1 },
+            "unlockCondition": "arcade-01-completed",
+            "feedback": "贴纸飞向贴纸墙记录"
+        }
+    ]
+}

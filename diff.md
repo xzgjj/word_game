@@ -73,3 +73,14 @@
   - 新增根目录 `RUN_DEBUG_GUIDE.md`，说明网页演示查看、Unity 安装、免费使用资格核对、Unity 工程配合、2K/1080p 画质、4K 素材源文件、调试步骤和故障排查。
   - 将该指南加入项目结构说明。
 - 修改意图：让没有游戏开发经验的个人开发者也能方便运行、查看、调试和逐步调整项目。
+
+## 2026-04-12 v2 架构设计更新
+- 日期/时间：2026-04-12
+- 涉及文件：`PROJECT_ARCHITECTURE_UPDATE.md`、`README.md`、`project_structure.md`、`implementation_plan.md`、`notes.txt`、`doc/design_document.md`、`doc/interaction_technical_spec.md`、`unity/README.md`、`game-data/resources.json`、`game-data/build-recipes.json`、`game-data/world-nodes.json`、`game-data/item-catalog.json`、`game-data/exchange-recipes.json`、`game-data/blueprint-unlocks.json`
+- 核心 Diff 摘要：
+  - 新增 `PROJECT_ARCHITECTURE_UPDATE.md`，把“不做大地图”修正为不做多个主世界场景地图，而是在一个单主地图内做持续建设和摆放深度。
+  - 补齐资源分布：木材、石子、花种、河贝和鱼来自森林、河岸或河水；表情碎片、旧卡带、星屑灯芯和贴纸主要通过木屋前木牌用物资兑换。
+  - 增加木牌兑换、图纸赠送、建设 3 个物品后开启受控自建建筑物的交互路径、状态变化、反馈和接口调用链。
+  - 增加物品栏规则：格子数 = 物品种类 + 3，v2 当前 9 类物品对应 12 格，每类物品上限 9999。
+  - 新增 `game-data/item-catalog.json`、`game-data/exchange-recipes.json` 和 `game-data/blueprint-unlocks.json`，让后续 Unity 实现可直接映射 ScriptableObject 或 JSON 配置。
+- 修改意图：把用户补充的资源、兑换、图纸、自建、物品栏和单主地图系统深度要求，整理为可执行的 PRD、交互规格、数据模型和初步工程架构。

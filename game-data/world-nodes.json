@@ -1,14 +1,19 @@
 {
     "nodes": [
         { "id": "home-yard", "label": "木屋周围", "type": "home", "stateKey": "homeArea.inspected" },
+        { "id": "home-signboard", "label": "木屋前木牌", "type": "signboard", "stateKey": "knownSystems.signboard" },
         { "id": "forest-branch", "label": "森林树枝", "type": "resource", "resourceId": "wood" },
-        { "id": "forest-shard", "label": "表情碎片", "type": "resource", "resourceId": "shard" },
+        { "id": "forest-flower-seed", "label": "森林花种", "type": "resource", "resourceId": "flowerSeed" },
+        { "id": "river-stone", "label": "河岸石子", "type": "resource", "resourceId": "stone" },
+        { "id": "river-shell", "label": "河贝", "type": "resource", "resourceId": "riverShell" },
+        { "id": "river-fish", "label": "河水鱼影", "type": "fishing", "resourceId": "fish" },
         { "id": "river-bridge", "label": "半损坏木桥", "type": "building", "recipeId": "bridge" },
-        { "id": "clearing-arcade", "label": "空地游戏机", "type": "arcade", "requires": ["river-bridge"] },
+        { "id": "clearing-arcade", "label": "空地游戏机", "type": "arcade", "requires": ["river-bridge", "oldCartridge"] },
         { "id": "sticker-wall", "label": "贴纸墙", "type": "building", "recipeId": "sticker-wall" },
         { "id": "flower-bed-slot", "label": "花圃空位", "type": "building", "recipeId": "flower-bed" },
         { "id": "craft-bench-slot", "label": "工作台空位", "type": "building", "recipeId": "craft-bench" },
         { "id": "river-lamp-slot", "label": "河岸灯空位", "type": "building", "recipeId": "river-lamp" },
-        { "id": "forest-sign-slot", "label": "林间路牌空位", "type": "building", "recipeId": "forest-sign" }
+        { "id": "forest-sign-slot", "label": "林间路牌空位", "type": "building", "recipeId": "forest-sign" },
+        { "id": "custom-building-slot", "label": "自建建筑物空位", "type": "building", "recipeId": "custom-building", "requires": ["builtCountAtLeast:3"] }
     ]
 }

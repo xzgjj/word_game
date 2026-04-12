@@ -7,6 +7,7 @@
         { "id": "river-lamp", "label": "河岸灯", "cost": { "wood": 1, "starCore": 1 }, "slot": "river-bank", "feedback": "夜晚河岸出现暖光", "unlocks": ["night-guidance"] },
         { "id": "sticker-wall", "label": "贴纸墙", "cost": { "sticker": 3 }, "slot": "cabin-wall", "feedback": "贴纸图案新增", "unlocks": ["home-memory"] },
         { "id": "arcade-base", "label": "游戏机底座", "cost": { "stone": 2, "starCore": 1 }, "slot": "clearing", "feedback": "游戏机入口更醒目", "unlocks": ["arcade-focus"] },
-        { "id": "forest-sign", "label": "林间路牌", "cost": { "wood": 1, "shard": 1 }, "slot": "forest-entry", "feedback": "森林入口出现轻提示", "unlocks": ["soft-guidance"] }
+        { "id": "forest-sign", "label": "林间路牌", "cost": { "wood": 1, "emotionShard": 1 }, "slot": "forest-entry", "feedback": "森林入口出现轻提示", "unlocks": ["soft-guidance"] },
+        { "id": "custom-building", "label": "自建建筑物", "cost": { "wood": 2, "stone": 1 }, "slot": "custom-placement", "feedback": "自建小物件落位", "unlocks": ["custom-decoration"], "requires": { "builtCountAtLeast": 3 } }
     ]
 }
