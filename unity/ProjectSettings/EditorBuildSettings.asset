@@ -8,5 +8,8 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Scenes/WorldHub.unity
     guid: 2003c2d922f0659439e3126a2f39ef71
+  - enabled: 1
+    path: Assets/Scenes/MiniGame01.unity
+    guid: 8497900d6d6a9fd438d2cadf1d9e42db
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}

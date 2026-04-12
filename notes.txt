@@ -32,5 +32,7 @@
 - 2026-04-13 靠近提示复核：`WorldNodeInteractor` 新增交互半径、`IsInRange` 和 `GetPrompt`，只有玩家进入范围才返回生活化短提示。自动脚本验证 EditMode 39/39 Passed。
 - 2026-04-13 建设节点接入复核：`WorldNodeService` 接入 `river-bridge`、花圃、林间路牌、河岸灯、游戏机底座等建设节点，`WorldHubSceneBuilder` 同步生成建设空位节点。自动脚本验证 EditMode 40/40 Passed。
 - 2026-04-13 木牌菜单快照复核：新增 `SignboardMenuSnapshot` 与兑换可用性列表，木牌 UI 后续可直接读取建设数量、自建解锁、已发现图纸和可换状态，不需要复制业务规则。自动脚本验证 EditMode 41/41 Passed。
+- 2026-04-13 小游戏闭环复核：`MiniGameService` 新增当前贴纸计数、收集贴纸、出口条件和成功前贴纸目标校验；`SaveService` 同步保存当前小游戏贴纸计数。新增 `MiniGame01.unity` 占位场景，包含像素玩家、3 个贴纸、出口门和平台。自动脚本验证 EditMode 44/44 Passed。
+- 2026-04-13 阶段 5 提交状态：本地分支 `stage-5-minigame-reward-loop` 已提交 `cf609c1 Add mini game sticker loop`，提交前自动脚本验证 EditMode 44/44 Passed。推送 `origin/stage-5-minigame-reward-loop` 失败，错误为 SSH `Connection closed by 198.18.0.84 port 22`。
 - 2026-04-13 阶段 4 提交状态：本地分支 `stage-4-build-signboard-loop` 已提交 `2dc792c Connect build nodes and signboard menu`，提交前自动脚本验证 EditMode 41/41 Passed。推送 `origin/stage-4-build-signboard-loop` 连续两次失败，错误为 SSH `kex_exchange_identification: read: Software caused connection abort`，后续需网络恢复后重试。
 - 2026-04-13 续传执行口径：用户休息期间继续推进 Unity 主线；“最终阶段”按 `implementation_plan.md` 的最终阶段理解，中间阶段按实现、最小测试、review、提交的节奏推进。若上下文或额度接近边界，先把当前阶段、变更文件、测试命令、测试结果、下一步写入 `notes.txt` / `diff.md`；后续恢复必须先读 `AGENT_EXECUTION_PROTOCOL.md`、`CLAUDE.md`、`implementation_plan.md`、`notes.txt`、`diff.md`。

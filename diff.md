@@ -272,6 +272,26 @@
   - 推送远端连续两次失败，错误为 SSH `kex_exchange_identification: read: Software caused connection abort`。
 - 修改意图：记录阶段提交已完成但远端推送受网络/SSH 连接阻塞，便于后续恢复时继续。
 
+## 2026-04-13 小游戏贴纸闭环与 MiniGame01 场景
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Core/GameConstants.cs`、`unity/Assets/Scripts/Core/PlayerState.cs`、`unity/Assets/Scripts/MiniGame/MiniGameService.cs`、`unity/Assets/Scripts/Save/SaveService.cs`、`unity/Assets/Editor/WorldHubSceneBuilder.cs`、`unity/Assets/Scenes/MiniGame01.unity`、`unity/Assets/Tests/EditMode/MiniGameServiceTests.cs`、`unity/Assets/Tests/EditMode/MiniGameSceneTests.cs`、`unity/Assets/Tests/EditMode/SaveServiceTests.cs`、`unity/Assets/Tests/EditMode/GameStateTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `GameConstants.MiniGameStickerTarget = 3` 和 `PlayerState.ActiveMiniGameStickerCount`。
+  - `MiniGameService` 新增贴纸收集、出口条件判断、成功前贴纸目标校验；开始小游戏时重置计数，失败/手动返回不结算贴纸。
+  - `SaveService` 同步保存/读取当前小游戏贴纸计数。
+  - `WorldHubSceneBuilder` 新增 `BuildMiniGame01Scene`，生成像素玩家、3 个贴纸、出口门和平台的占位小游戏场景。
+  - 新增/更新 EditMode 测试；自动脚本验证 EditMode 44/44 Passed。
+- 修改意图：把“旧卡带/游戏机菜单 -> 像素小游戏 -> 收集贴纸 -> 回木屋贴纸墙”的核心奖励闭环落到可测试状态机和占位场景。
+
+## 2026-04-13 阶段 5 提交与推送状态
+- 日期/时间：2026-04-13
+- 涉及文件：`notes.txt`
+- 核心 Diff 摘要：
+  - 阶段 5 本地分支 `stage-5-minigame-reward-loop` 已提交 `cf609c1 Add mini game sticker loop`。
+  - 提交前自动脚本验证 EditMode 44/44 Passed。
+  - 推送远端失败，错误为 SSH `Connection closed by 198.18.0.84 port 22`。
+- 修改意图：记录阶段 5 本地完成但远端推送受网络/SSH 连接阻塞，后续需重试阶段 4 和阶段 5 分支推送。
+
 ## 2026-04-13 续传执行口径记录
 - 日期/时间：2026-04-13
 - 涉及文件：`notes.txt`、`diff.md`

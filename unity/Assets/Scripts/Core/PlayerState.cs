@@ -28,6 +28,7 @@ namespace StarryForest.Core
         public HashSet<string> KnownSystems { get; }
         public HashSet<string> UnlockedMiniGames { get; }
         public string ActiveMiniGameId { get; set; }
+        public int ActiveMiniGameStickerCount { get; set; }
         public int BuiltCount { get; set; }
         public bool CustomBuildUnlocked { get; set; }
         public HashSet<string> CompletedMiniGames { get; }

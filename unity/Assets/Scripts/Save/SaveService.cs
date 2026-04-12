@@ -58,6 +58,7 @@ namespace StarryForest.Save
         public List<string> knownSystems = new List<string>();
         public List<string> unlockedMiniGames = new List<string>();
         public string activeMiniGameId;
+        public int activeMiniGameStickerCount;
         public int builtCount;
         public bool customBuildUnlocked;
         public List<string> completedMiniGames = new List<string>();
@@ -73,6 +74,7 @@ namespace StarryForest.Save
                 timeOfDay = state.TimeOfDay.ToString(),
                 inventorySlotCount = state.InventorySlotCount,
                 activeMiniGameId = state.ActiveMiniGameId,
+                activeMiniGameStickerCount = state.ActiveMiniGameStickerCount,
                 builtCount = state.BuiltCount,
                 customBuildUnlocked = state.CustomBuildUnlocked,
                 stickerWallCount = state.StickerWallCount
@@ -108,6 +110,7 @@ namespace StarryForest.Save
                 Emotion = ParseEnum(emotion, EmotionMode.Joy),
                 TimeOfDay = ParseEnum(timeOfDay, TimeOfDay.Morning),
                 ActiveMiniGameId = string.IsNullOrEmpty(activeMiniGameId) ? null : activeMiniGameId,
+                ActiveMiniGameStickerCount = activeMiniGameStickerCount,
                 BuiltCount = builtCount,
                 CustomBuildUnlocked = customBuildUnlocked,
                 StickerWallCount = stickerWallCount

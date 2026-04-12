@@ -26,6 +26,9 @@ namespace StarryForest.Tests.EditMode
             gameState.Inventory.Add(gameState.Player, ItemId.OldCartridge, 1);
 
             OperationResult startResult = gameState.StartMiniGame(GameConstants.FirstMiniGameId);
+            gameState.MiniGames.CollectSticker(gameState.Player);
+            gameState.MiniGames.CollectSticker(gameState.Player);
+            gameState.MiniGames.CollectSticker(gameState.Player);
             OperationResult finishResult = gameState.FinishMiniGame(new MiniGameResult(GameConstants.FirstMiniGameId, true, 3));
 
             Assert.IsTrue(startResult.Success, startResult.Message);

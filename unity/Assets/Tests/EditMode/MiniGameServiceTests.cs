@@ -54,6 +54,9 @@ namespace StarryForest.Tests.EditMode
             miniGame.DiscoverArcade(state);
             inventory.Add(state, ItemId.OldCartridge, 1);
             miniGame.Start(state, GameConstants.FirstMiniGameId);
+            miniGame.CollectSticker(state);
+            miniGame.CollectSticker(state);
+            miniGame.CollectSticker(state);
 
             OperationResult result = miniGame.Finish(state, new MiniGameResult(GameConstants.FirstMiniGameId, true, 3));
 
@@ -64,6 +67,44 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(3, inventory.GetCount(state, ItemId.Sticker));
             Assert.IsTrue(state.UnlockedBlueprints.Contains(BlueprintId.StickerWall));
             Assert.IsTrue(state.UnlockedBlueprints.Contains(BlueprintId.ArcadeBase));
+        }
+
+        [Test]
+        public void CollectStickerTracksExitReadiness()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            MiniGameService miniGame = new MiniGameService(inventory);
+            miniGame.DiscoverArcade(state);
+            inventory.Add(state, ItemId.OldCartridge, 1);
+            miniGame.Start(state, GameConstants.FirstMiniGameId);
+
+            miniGame.CollectSticker(state);
+            miniGame.CollectSticker(state);
+
+            Assert.IsFalse(miniGame.CanExit(state));
+
+            miniGame.CollectSticker(state);
+
+            Assert.IsTrue(miniGame.CanExit(state));
+            Assert.AreEqual(GameConstants.MiniGameStickerTarget, state.ActiveMiniGameStickerCount);
+        }
+
+        [Test]
+        public void FinishRejectsSuccessBeforeStickerTarget()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            MiniGameService miniGame = new MiniGameService(inventory);
+            miniGame.DiscoverArcade(state);
+            inventory.Add(state, ItemId.OldCartridge, 1);
+            miniGame.Start(state, GameConstants.FirstMiniGameId);
+            miniGame.CollectSticker(state);
+
+            OperationResult result = miniGame.Finish(state, new MiniGameResult(GameConstants.FirstMiniGameId, true, 1));
+
+            Assert.IsFalse(result.Success);
+            Assert.AreEqual(GameConstants.FirstMiniGameId, state.ActiveMiniGameId);
         }
 
         [Test]

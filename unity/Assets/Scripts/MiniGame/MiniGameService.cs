@@ -55,7 +55,30 @@ namespace StarryForest.MiniGame
             }
 
             state.ActiveMiniGameId = miniGameId;
+            state.ActiveMiniGameStickerCount = 0;
             return OperationResult.Ok("进入像素小游戏。");
+        }
+
+        public OperationResult CollectSticker(PlayerState state)
+        {
+            if (state.ActiveMiniGameId == null)
+            {
+                return OperationResult.Fail("当前不在小游戏中。");
+            }
+
+            if (state.ActiveMiniGameStickerCount >= GameConstants.MiniGameStickerTarget)
+            {
+                return OperationResult.Ok("贴纸已经收齐。");
+            }
+
+            state.ActiveMiniGameStickerCount += 1;
+            return OperationResult.Ok("贴纸已收集。");
+        }
+
+        public bool CanExit(PlayerState state)
+        {
+            return state.ActiveMiniGameId != null
+                && state.ActiveMiniGameStickerCount >= GameConstants.MiniGameStickerTarget;
         }
 
         public OperationResult Finish(PlayerState state, MiniGameResult result)
@@ -70,7 +93,13 @@ namespace StarryForest.MiniGame
                 return OperationResult.Fail("小游戏状态不匹配。");
             }
 
+            if (result.Success && result.StickersCollected < GameConstants.MiniGameStickerTarget)
+            {
+                return OperationResult.Fail("贴纸还没有收齐。");
+            }
+
             state.ActiveMiniGameId = null;
+            state.ActiveMiniGameStickerCount = 0;
             if (!result.Success)
             {
                 return OperationResult.Ok("已返回主世界，未结算贴纸。");

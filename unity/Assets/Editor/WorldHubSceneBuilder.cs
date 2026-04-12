@@ -11,6 +11,7 @@ namespace StarryForest.EditorTools
     public static class WorldHubSceneBuilder
     {
         private const string ScenePath = "Assets/Scenes/WorldHub.unity";
+        private const string MiniGameScenePath = "Assets/Scenes/MiniGame01.unity";
 
         public static void BuildWorldHubScene()
         {
@@ -30,6 +31,33 @@ namespace StarryForest.EditorTools
             Directory.CreateDirectory("Assets/Scenes");
             EditorSceneManager.SaveScene(scene, ScenePath);
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
+            AssetDatabase.SaveAssets();
+        }
+
+        public static void BuildMiniGame01Scene()
+        {
+            Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
+            GameObject root = new GameObject("MiniGame01");
+
+            CreateCube("PixelPlatform_Start", new Vector3(-3f, 0f, 0f), new Vector3(2f, 0.25f, 1f), new Color(0.23f, 0.25f, 0.32f)).transform.SetParent(root.transform);
+            CreateCube("PixelPlatform_Middle", new Vector3(0f, 0.8f, 0f), new Vector3(2f, 0.25f, 1f), new Color(0.23f, 0.25f, 0.32f)).transform.SetParent(root.transform);
+            CreateCube("PixelPlatform_Exit", new Vector3(3f, 1.4f, 0f), new Vector3(2f, 0.25f, 1f), new Color(0.23f, 0.25f, 0.32f)).transform.SetParent(root.transform);
+
+            CreateCube("PixelPlayer", new Vector3(-3.5f, 0.6f, 0f), new Vector3(0.45f, 0.45f, 0.45f), new Color(1f, 0.86f, 0.22f)).transform.SetParent(root.transform);
+            CreateCube("Sticker_1", new Vector3(-2.5f, 0.75f, 0f), new Vector3(0.28f, 0.28f, 0.08f), new Color(1f, 0.52f, 0.68f)).transform.SetParent(root.transform);
+            CreateCube("Sticker_2", new Vector3(0f, 1.55f, 0f), new Vector3(0.28f, 0.28f, 0.08f), new Color(1f, 0.52f, 0.68f)).transform.SetParent(root.transform);
+            CreateCube("Sticker_3", new Vector3(2.6f, 2.15f, 0f), new Vector3(0.28f, 0.28f, 0.08f), new Color(1f, 0.52f, 0.68f)).transform.SetParent(root.transform);
+            CreateCube("ExitDoor", new Vector3(3.8f, 2.05f, 0f), new Vector3(0.45f, 0.9f, 0.2f), new Color(0.35f, 0.85f, 0.95f)).transform.SetParent(root.transform);
+
+            CreateCameraAndLight();
+
+            Directory.CreateDirectory("Assets/Scenes");
+            EditorSceneManager.SaveScene(scene, MiniGameScenePath);
+            EditorBuildSettings.scenes = new[]
+            {
+                new EditorBuildSettingsScene(ScenePath, true),
+                new EditorBuildSettingsScene(MiniGameScenePath, true)
+            };
             AssetDatabase.SaveAssets();
         }
 

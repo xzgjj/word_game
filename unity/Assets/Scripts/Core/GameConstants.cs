@@ -8,5 +8,6 @@ namespace StarryForest.Core
         public const string SignboardSystemId = "signboard";
         public const string ArcadeSystemId = "arcade";
         public const string FirstMiniGameId = "arcade-01";
+        public const int MiniGameStickerTarget = 3;
     }
 }

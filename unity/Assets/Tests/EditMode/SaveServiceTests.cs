@@ -25,7 +25,8 @@ namespace StarryForest.Tests.EditMode
                 BuiltCount = 3,
                 CustomBuildUnlocked = true,
                 StickerWallCount = 1,
-                ActiveMiniGameId = GameConstants.FirstMiniGameId
+                ActiveMiniGameId = GameConstants.FirstMiniGameId,
+                ActiveMiniGameStickerCount = 2
             };
             state.Items[ItemId.Wood] = 5;
             state.Items[ItemId.Sticker] = 3;
@@ -47,6 +48,7 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(ItemCatalog.InventorySlotCount, loadResult.State.InventorySlotCount);
             Assert.AreEqual(EmotionMode.Calm, loadResult.State.Emotion);
             Assert.AreEqual(TimeOfDay.Night, loadResult.State.TimeOfDay);
+            Assert.AreEqual(2, loadResult.State.ActiveMiniGameStickerCount);
             Assert.AreEqual(5, loadResult.State.Items[ItemId.Wood]);
             Assert.AreEqual(3, loadResult.State.Items[ItemId.Sticker]);
             Assert.IsTrue(loadResult.State.UnlockedBlueprints.Contains(BlueprintId.CustomBuilding));
