@@ -25,6 +25,17 @@ body {
     color: var(--ink);
 }
 
+body[data-time="noon"] {
+    background:
+        linear-gradient(180deg, rgba(244, 211, 94, 0.18), transparent 34%),
+        linear-gradient(135deg, #f8fff5 0%, #e9f7ef 52%, #fff2c9 100%);
+}
+
+body[data-time="night"] {
+    background:
+        linear-gradient(180deg, rgba(38, 56, 50, 0.64), rgba(73, 183, 199, 0.18) 42%, #dfeee8 100%);
+}
+
 button {
     font: inherit;
 }
@@ -99,6 +110,22 @@ h1 {
         linear-gradient(90deg, rgba(47, 157, 114, 0.18) 0 10%, transparent 10% 90%, rgba(47, 157, 114, 0.16) 90%),
         #dff3ea;
     box-shadow: var(--shadow);
+}
+
+body[data-time="noon"] .world-board {
+    background:
+        radial-gradient(circle at 18% 20%, rgba(244, 211, 94, 0.48), transparent 14%),
+        linear-gradient(180deg, rgba(73, 183, 199, 0.12) 0 20%, transparent 20%),
+        linear-gradient(90deg, rgba(47, 157, 114, 0.18) 0 10%, transparent 10% 90%, rgba(47, 157, 114, 0.16) 90%),
+        #e6f5df;
+}
+
+body[data-time="night"] .world-board {
+    background:
+        radial-gradient(circle at 76% 18%, rgba(189, 247, 240, 0.36), transparent 14%),
+        linear-gradient(180deg, rgba(38, 56, 50, 0.34) 0 20%, transparent 20%),
+        linear-gradient(90deg, rgba(47, 157, 114, 0.18) 0 10%, transparent 10% 90%, rgba(47, 157, 114, 0.16) 90%),
+        #cfe6df;
 }
 
 .skyline {
@@ -281,12 +308,14 @@ h1 {
 }
 
 .mode-buttons,
+.time-buttons,
 .step-list {
     display: grid;
     gap: 10px;
 }
 
-.mode-button {
+.mode-button,
+.time-button {
     min-height: 44px;
     border: 1px solid rgba(38, 56, 50, 0.16);
     border-radius: 8px;
@@ -295,7 +324,8 @@ h1 {
     cursor: pointer;
 }
 
-.mode-button.active {
+.mode-button.active,
+.time-button.active {
     border-color: var(--coral);
     background: rgba(255, 111, 97, 0.12);
 }
@@ -316,6 +346,18 @@ h1 {
 .step-list span.done {
     color: var(--ink);
     background: rgba(47, 157, 114, 0.16);
+}
+
+.build-list {
+    display: grid;
+    gap: 8px;
+}
+
+.build-list span {
+    padding: 9px 10px;
+    border-radius: 8px;
+    background: rgba(244, 211, 94, 0.18);
+    color: var(--ink);
 }
 
 .pixel-stage {

@@ -15,7 +15,7 @@
             </div>
             <div class="status-panel" aria-live="polite">
                 <span id="locationLabel">木屋前</span>
-                <span id="objectiveLabel">目标：去空地看看发光的游戏机</span>
+                <span id="objectiveLabel">发现：空地有一台发光游戏机</span>
                 <span id="inventoryLabel">木材 0 / 贴纸 0 / 碎片 0</span>
             </div>
         </header>
@@ -42,7 +42,7 @@
                     <span>空地游戏机</span>
                 </button>
                 <div class="avatar-token" id="avatarToken">😄</div>
-                <div class="prompt-bubble" id="promptBubble">从木屋出发，先去森林拾取木材。</div>
+                <div class="prompt-bubble" id="promptBubble">森林里有木材，河边有一座待修的木桥。</div>
             </section>
 
             <aside class="control-surface" aria-label="交互控制">
@@ -57,13 +57,33 @@
                 </section>
 
                 <section>
-                    <p class="panel-kicker">流程推进</p>
+                    <p class="panel-kicker">小镇记录</p>
                     <div class="step-list" id="stepList">
-                        <span class="done">木屋前出生</span>
-                        <span>森林拾取</span>
-                        <span>修桥过河</span>
-                        <span>进入像素模式</span>
-                        <span>贴纸墙更新</span>
+                        <span class="done">木屋已安置</span>
+                        <span>发现森林资源</span>
+                        <span>木桥已修好</span>
+                        <span>游戏机已点亮</span>
+                        <span>贴纸墙新增</span>
+                    </div>
+                </section>
+
+                <section>
+                    <p class="panel-kicker">小镇时间</p>
+                    <div class="time-buttons">
+                        <button class="time-button active" type="button" data-time="morning">清晨</button>
+                        <button class="time-button" type="button" data-time="noon">午后</button>
+                        <button class="time-button" type="button" data-time="night">夜晚</button>
+                    </div>
+                    <p class="mode-desc" id="timeDesc">清晨适合采集木材和整理木屋周围。</p>
+                </section>
+
+                <section>
+                    <p class="panel-kicker">建设清单</p>
+                    <div class="build-list">
+                        <span>木桥：木材 1</span>
+                        <span>花圃：花种 2 / 石子 1</span>
+                        <span>河岸灯：木材 1 / 星屑 1</span>
+                        <span>贴纸墙：贴纸 3</span>
                     </div>
                 </section>
 
@@ -82,8 +102,8 @@
 
         <section class="design-notes" aria-label="对标验收">
             <article>
-                <h2>主世界目标</h2>
-                <p>从木屋出发，拾取森林资源，修好木桥，抵达空地游戏机。所有节点都会更新目标、资源或流程状态。</p>
+                <h2>主世界行为</h2>
+                <p>玩家自由查看木屋周围、森林、河岸和空地。收集来自场景需求，建设物会自然提示需要哪些材料。</p>
             </article>
             <article>
                 <h2>像素小游戏</h2>

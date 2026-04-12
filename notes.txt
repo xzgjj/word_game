@@ -11,3 +11,4 @@
 - 2026-04-12 复核：本轮补齐文档、状态流、接口、数据结构、三轮审核标准，并将网页概念页从说明页调整为可交互画面对齐页。
 - 2026-04-12 追加复核：README 只保留游戏本身说明；对标、80 分门禁、三角色 review、行为路径与技术拆分统一沉入 `doc/visual_alignment_standard.md` 和 `doc/interaction_technical_spec.md`。
 - 重要记忆：后续实现前必须先看 `doc/visual_alignment_standard.md`，最终画面需要融合统一并达到 80 分以上；审核角色固定为资深游戏设计者、资深玩家、资深架构师。
+- 2026-04-12 玩家行为更新：自由探索为主，不使用任务列表驱动收集；通过木屋周围建设需求、桥梁缺口、材料反馈和可调时间自然引导。资源与建设物清单已写入 `doc/design_document.md`，状态路径写入 `doc/interaction_technical_spec.md`。

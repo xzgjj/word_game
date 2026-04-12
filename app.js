@@ -1,6 +1,6 @@
 const state = {
     location: "木屋前",
-    objective: "目标：去空地看看发光的游戏机",
+    objective: "发现：空地有一台发光游戏机",
     wood: 0,
     stickers: 0,
     shards: 0,
@@ -8,6 +8,7 @@ const state = {
     inPixelMode: false,
     completed: false,
     emotion: "joy",
+    timeOfDay: "morning",
 };
 
 const emotionMeta = {
@@ -39,6 +40,13 @@ const pixelHero = document.getElementById("pixelHero");
 const stickerCounter = document.getElementById("stickerCounter");
 const exitDoor = document.getElementById("exitDoor");
 const stepList = document.getElementById("stepList");
+const timeDesc = document.getElementById("timeDesc");
+
+const timeMeta = {
+    morning: "清晨适合采集木材和整理木屋周围。",
+    noon: "午后光线清楚，适合修桥、摆放花圃和查看河岸。",
+    night: "夜晚能看到游戏机和河岸灯的光，适合检查空地布置。",
+};
 
 function updateHud() {
     locationLabel.textContent = state.location;
@@ -73,13 +81,22 @@ function setEmotion(mode) {
     });
 }
 
+function setTimeOfDay(timeKey) {
+    state.timeOfDay = timeKey;
+    document.body.dataset.time = timeKey;
+    timeDesc.textContent = timeMeta[timeKey];
+    document.querySelectorAll(".time-button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.time === timeKey);
+    });
+}
+
 function handleWorldAction(action) {
     if (action === "home") {
         state.location = "木屋前";
-        state.objective = state.completed ? "目标：查看贴纸墙的新贴纸" : "目标：去空地看看发光的游戏机";
+        state.objective = state.completed ? "发现：贴纸墙新增了一张贴纸" : "发现：空地有一台发光游戏机";
         promptBubble.textContent = state.completed
             ? "贴纸墙已经更新，第一轮闭环完成。"
-            : "木屋是安全起点。先去森林拾取木材，再修桥过河。";
+            : "木屋周围可以继续摆放花圃、路牌和河岸灯。";
         avatarToken.classList.remove("pixel");
         moveAvatar("236px", "250px");
     }
@@ -88,24 +105,24 @@ function handleWorldAction(action) {
         state.location = "旁友森林";
         state.wood = Math.max(state.wood, 1);
         state.shards = Math.max(state.shards, 1);
-        state.objective = "目标：带着木材去河边修桥";
-        promptBubble.textContent = "拾取到木材和表情碎片。桥只需要 1 个木材，避免早期系统变复杂。";
+        state.objective = "发现：木材可用于修桥或制作木屋周围摆件";
+        promptBubble.textContent = "拾取到木材和表情碎片。建设清单会显示这些材料能做什么。";
         moveAvatar("58%", "310px");
     }
 
     if (action === "arcade") {
         if (!state.bridgeRepaired) {
             if (state.wood < 1) {
-                state.objective = "目标：先去森林找木材";
-                promptBubble.textContent = "河流挡住了去空地的路。先去旁友森林拾取木材。";
+                state.objective = "发现：木桥缺少 1 个木材";
+                promptBubble.textContent = "木桥还不能修，森林里的树枝可以作为木材。";
                 updateHud();
                 return;
             }
 
             state.bridgeRepaired = true;
             state.location = "河边木桥";
-            state.objective = "目标：木桥修好了，前往空地游戏机";
-            promptBubble.textContent = "木桥补齐。下一次点击空地游戏机，会确认进入像素模式。";
+            state.objective = "发现：河岸和空地已经连通";
+            promptBubble.textContent = "木桥补齐。空地游戏机开始发光，玩家可以自己选择是否进入。";
             moveAvatar("50%", "355px");
             updateHud();
             return;
@@ -113,7 +130,7 @@ function handleWorldAction(action) {
 
         state.location = "空地游戏机";
         state.inPixelMode = true;
-        state.objective = "目标：像素模式中收集 3 个贴纸";
+        state.objective = "发现：像素模式需要 3 个贴纸点亮出口";
         promptBubble.textContent = "拾取游戏卡带，主角像素化。点击小游戏里的贴纸，收齐后点出口返回主世界。";
         avatarToken.classList.add("pixel");
         moveAvatar("74%", "456px");
@@ -130,7 +147,7 @@ function collectSticker(button) {
 
     button.classList.add("collected");
     state.stickers += 1;
-    state.objective = state.stickers >= 3 ? "目标：贴纸已集齐，打开出口" : "目标：继续收集贴纸";
+    state.objective = state.stickers >= 3 ? "发现：出口已经点亮" : "发现：贴纸可以装饰木屋贴纸墙";
     promptBubble.textContent = state.stickers >= 3
         ? "3 个贴纸已收齐。现在可以点击出口回到主世界。"
         : "贴纸飞入 HUD。小游戏保持轻松，不设置惩罚。";
@@ -146,7 +163,7 @@ function exitMiniGame() {
     state.inPixelMode = false;
     state.completed = true;
     state.location = "空地游戏机";
-    state.objective = "目标：回木屋查看贴纸墙";
+    state.objective = "发现：贴纸墙可以更新";
     promptBubble.textContent = "小游戏完成，回到主世界。游戏机点亮，木屋贴纸墙会新增贴纸。";
     avatarToken.classList.remove("pixel");
     moveAvatar("74%", "456px");
@@ -155,6 +172,10 @@ function exitMiniGame() {
 
 document.querySelectorAll(".mode-button").forEach((button) => {
     button.addEventListener("click", () => setEmotion(button.dataset.mode));
+});
+
+document.querySelectorAll(".time-button").forEach((button) => {
+    button.addEventListener("click", () => setTimeOfDay(button.dataset.time));
 });
 
 document.querySelectorAll(".map-node").forEach((node) => {
@@ -168,4 +189,5 @@ document.querySelectorAll(".sticker").forEach((button) => {
 exitDoor.addEventListener("click", exitMiniGame);
 
 setEmotion("joy");
+setTimeOfDay("morning");
 updateHud();
