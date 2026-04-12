@@ -30,3 +30,15 @@
   - 增加三轮对标审核和每 10 分钟 review 标准。
   - 将网页概念页改为可交互地图：木屋、森林、河流、桥、空地游戏机、像素小游戏、情绪切换和流程推进。
 - 修改意图：把“不要机械拆任务，要补全缺失设计并能落地”的要求转化为可实现的 0-1 项目设计和可视化概念页。
+
+## 2026-04-12 文档归档与审核报告更新
+- 日期/时间：2026-04-12
+- 涉及文件：`README.md`、`implementation_plan.md`、`project_structure.md`、`notes.txt`、`index.html`、`style.css`、`doc/design_document.md`、`doc/interaction_technical_spec.md`、`doc/visual_alignment_standard.md`、`PROJECT_AUDIT_REPORT.md`
+- 核心 Diff 摘要：
+  - 将 README 调整为只讲游戏本身，不再展示对标分析、工程审计和文件索引。
+  - 新增 `doc/visual_alignment_standard.md`，记录画面对齐方法、80 分通过标准、三角色 review 和 v1 自评分。
+  - 新增 `doc/interaction_technical_spec.md`，记录玩家行为路径、状态变化、反馈、接口和 Unity 拆分建议。
+  - 新增根目录 `PROJECT_AUDIT_REPORT.md`，按系统认知层、结构控制层、工程执行层和 1-15 项顺序输出项目审核报告。
+  - 清理 `style.css`，移除旧样式叠加，保留单一概念演示样式。
+  - 更新 `implementation_plan.md`，明确先推送 `main`，再切换并推送 `v1`，推送后等待用户确认再开始实现。
+- 修改意图：把设计、画面、玩法和技术标准体系化沉淀，确保后续实现前有可审核、可评分、可执行的依据。

@@ -6,6 +6,7 @@
 - `implementation_plan.md`：项目阶段规划、review 规则与提交计划。
 - `diff.md`：关键修改记录。
 - `notes.txt`：项目笔记与复核记录。
+- `PROJECT_AUDIT_REPORT.md`：项目完成与审核报告。
 - `README.md`：项目概念、运行说明与文件索引。
 - `.gitignore`：忽略生成文件和运行时输出，不能忽略规范与执行文档。
 - `index.html`：网页概念演示入口。
@@ -17,6 +18,8 @@
 ## `doc/` 目录
 - `design_document.md`：游戏整体设计规划，覆盖玩法、交互、UI、接口、数据结构和验收标准。
 - `level_sketches.md`：核心玩法与关卡草图，覆盖地图、节点、动线、触发条件、反馈和数据变化。
+- `interaction_technical_spec.md`：玩家行为路径、状态变化、接口和 Unity 拆分。
+- `visual_alignment_standard.md`：画面对齐方法、80 分通过标准和三轮 review。
 
 ## 后续 Unity 工程建议
 后续实现时建议新增 `unity/` 目录，但本轮只做规划与网页概念演示，不提前创建空工程。

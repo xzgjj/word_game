@@ -119,6 +119,8 @@ interface MiniGameResult {
 - 玩法对标：是否保留轻松探索、资源拾取、微建造、入口确认、小游戏返回。
 - 画面对标：是否能从画面上分辨木屋、森林、河流、空地、游戏机、远景光幕和像素模式。
 - 实现对标：每个交互是否有触发条件、反馈、数据变化和失败处理。
+- 详细评分标准：见 `doc/visual_alignment_standard.md`，80 分以上才允许进入实现阶段。
+- 详细行为路径与技术拆分：见 `doc/interaction_technical_spec.md`。
 
 
 
