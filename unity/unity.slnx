@@ -1,0 +1,4 @@
+﻿<Solution>
+  <Project Path="StarryForest.csproj" />
+  <Project Path="StarryForest.Tests.EditMode.csproj" />
+</Solution>

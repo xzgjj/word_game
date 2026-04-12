@@ -14,3 +14,17 @@
 - 2026-04-12 玩家行为更新：自由探索为主，不使用任务列表驱动收集；通过木屋周围建设需求、桥梁缺口、材料反馈和可调时间自然引导。资源与建设物清单已写入 `doc/design_document.md`，状态路径写入 `doc/interaction_technical_spec.md`。
 - 2026-04-12 命名与工程策略更新：游戏名改为《星绪森林》。定位更新为“不做大地图，但实现完整玩法并保留扩展能力”。新增 Unity 新手协作指南、素材流程、素材目录、Unity 骨架目录和 `game-data/` 初始配置。`doc/` 详细文档默认本地保留，不上传 git，仅上传 `doc/README.md` 索引。
 - 2026-04-12 v2 架构更新：修正“不做大地图”的含义为不做多个主世界场景地图，但允许单主地图持续摆放建设元素。新增木屋前木牌兑换、图纸赠送、建设 3 个物品后开启受控自建建筑物、物品栏格子数 = 物品种类 + 3、每类物品上限 9999。资源分布更新为木材、石子、花种、河贝和鱼来自森林/河岸/河水，表情碎片、旧卡带、星屑灯芯和贴纸主要通过木牌兑换。根目录新增 `PROJECT_ARCHITECTURE_UPDATE.md`，并同步 `doc/design_document.md`、`doc/interaction_technical_spec.md`、`implementation_plan.md` 和 `game-data/`。
+- 2026-04-13 执行顺序与对标标准更新：网页概念演示放到 Unity 核心系统和画面方向稳定之后，不能反向主导 Unity 实现。三次对标审核改为 PRD/系分/测分、画面/UI/体验、实现/架构/自动测试三层，并要求每 10 分钟按动森、我的世界、星穹铁道的方法做偏差检查。用户点到为止的设计、环节和测试要求必须由实现者补齐交互、状态、接口、数据结构、失败分支和验收标准。
+- 2026-04-13 Unity 续传复核：新增 Unity asmdef 测试程序集配置，确认 BatchMode EditMode 测试需去掉 `-quit` 才会进入 Test Runner；当前 `unity/Logs/editmode-test-results.xml` 为 8/8 Passed。新增 `GatherService` 与 `FishingService`，把森林、木屋旁、河岸、浅水和河水节点映射到基础材料，并覆盖未知节点失败分支；网页概念演示仍不更新。
+- 2026-04-13 口径修正：短流程探索只学习低压力、目标可见和非强制引导，不把“5 分钟内完成闭环”作为强制任务节奏；游戏机按发现后的菜单入口处理，玩家自主选择进入像素小游戏。
+- 2026-04-13 小游戏入口复核：新增 `MiniGameService`，当前语义是发现游戏机后开启菜单入口，玩家有旧卡带时可自主开始 `arcade-01`；完成成功后更新 `CompletedMiniGames`、`StickerWallCount` 和贴纸数量。EditMode 当前 12/12 Passed。
+- 2026-04-13 世界节点路由复核：新增 `WorldNodeService`，让场景节点后续只传入 `nodeId`，服务层路由到采集、钓鱼或游戏机菜单发现。符合单主地图、不强制路线、资源到物品栏反馈和游戏机规则切换入口要求。EditMode 当前 16/16 Passed。
+- 2026-04-13 存档与时间复核：新增 `SaveService`，用 DTO 列表转换保存物品、图纸、建设物、菜单发现、小游戏和贴纸墙状态，避免 Unity JSON 丢失 Dictionary/HashSet；新增 `TimeService`，只切换清晨/午后/夜晚提示，不影响资源概率。EditMode 当前 22/22 Passed。
+- 2026-04-13 自动测试脚本复核：新增 `tools/run-unity-editmode-tests.ps1`，固化 Unity BatchMode EditMode 测试命令，不带 `-quit`，并等待结果 XML 写入后解析。脚本验证输出 `Unity EditMode tests: 22/22 passed, 0 failed.`。
+- 2026-04-13 场景接入层复核：新增 `GameState` 统一持有 `PlayerState` 和核心服务，新增 `WorldNodeInteractor` 作为薄 MonoBehaviour，只负责节点配置和转发到服务层。避免把资源、小游戏和存档业务写进场景对象。自动脚本验证 EditMode 26/26 Passed。
+- 2026-04-13 木牌入口复核：新增 `SignboardService.Open`，打开木牌时记录 `signboard` 已发现并赠送初始图纸；`WorldNodeService` 接入 `home-signboard`。木牌仍是温和入口，不是任务列表。自动脚本验证 EditMode 28/28 Passed。
+- 2026-04-13 建设放置复核：`BuildService` 新增 `CanPlace`，放置前检查负数网格、图纸、配方、占位和材料，失败时不扣材料不增加 `BuiltCount`。符合单主地图摆放和我的世界式材料到建设反馈。自动脚本验证 EditMode 30/30 Passed。
+- 2026-04-13 自建建筑复核：`CustomBuildService` 新增材料主题与尺寸消耗，检查解锁、空配置、负数网格、占位和材料不足；成功写入结构化 `CustomBuildingData` 并增加 `BuiltCount`。自动脚本验证 EditMode 32/32 Passed。
+- 2026-04-13 图纸进度复核：`BlueprintService` 新增修桥后图纸和小游戏完成后图纸；`BuildService` 放置木桥后赠送木栅栏/河岸灯，`MiniGameService` 成功完成后赠送贴纸墙/游戏机底座。自动脚本验证 EditMode 33/33 Passed。
+- 2026-04-13 木牌兑换可用性复核：`SignboardService` 新增 `GetExchangeRecipes` 与 `CanExchange`，后续 UI 可直接显示可换/材料不足，不需要复制配方判断。自动脚本验证 EditMode 34/34 Passed。
+- 2026-04-13 续传执行口径：用户休息期间继续推进 Unity 主线；“最终阶段”按 `implementation_plan.md` 的最终阶段理解，中间阶段按实现、最小测试、review、提交的节奏推进。若上下文或额度接近边界，先把当前阶段、变更文件、测试命令、测试结果、下一步写入 `notes.txt` / `diff.md`；后续恢复必须先读 `AGENT_EXECUTION_PROTOCOL.md`、`CLAUDE.md`、`implementation_plan.md`、`notes.txt`、`diff.md`。

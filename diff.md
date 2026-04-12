@@ -84,3 +84,143 @@
   - 增加物品栏规则：格子数 = 物品种类 + 3，v2 当前 9 类物品对应 12 格，每类物品上限 9999。
   - 新增 `game-data/item-catalog.json`、`game-data/exchange-recipes.json` 和 `game-data/blueprint-unlocks.json`，让后续 Unity 实现可直接映射 ScriptableObject 或 JSON 配置。
 - 修改意图：把用户补充的资源、兑换、图纸、自建、物品栏和单主地图系统深度要求，整理为可执行的 PRD、交互规格、数据模型和初步工程架构。
+
+## 2026-04-13 执行顺序与对标审核更新
+- 日期/时间：2026-04-13
+- 涉及文件：`implementation_plan.md`、`doc/visual_alignment_standard.md`、`PROJECT_ARCHITECTURE_UPDATE.md`、`notes.txt`
+- 核心 Diff 摘要：
+  - 将网页概念演示调整为最后阶段，在 Unity 核心系统、资源设计和画面方向稳定后再更新。
+  - 将“三次对标审核通过标准”细化为 PRD/系分/测分、画面/UI/体验、实现/架构/自动测试三层。
+  - 明确每 10 分钟 review 必须按动森、我的世界、星穹铁道的方法做偏差检查：动森看家园生活和温和引导，我的世界看材料到建设反馈，星穹铁道看电子入口、远景光幕和进入后规则变化。
+  - 强化要求：用户点到为止的设计、环节和测试要求必须由实现者补齐交互、状态、接口、数据结构、失败分支和验收标准。
+- 修改意图：防止实现只停留在机械拆分，确保后续 Unity 实现、UI、最终画面效果和体验都按对标质量门禁推进。
+
+## 2026-04-13 Unity 核心服务续传
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/StarryForest.asmdef`、`unity/Assets/Tests/EditMode/StarryForest.Tests.EditMode.asmdef`、`unity/Assets/Scripts/World/Gathering/`、`unity/Assets/Tests/EditMode/WorldResourceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增运行时代码 asmdef 与 EditMode 测试 asmdef，让 Unity Test Runner 能发现 `CoreServicesTests` 和新增测试。
+  - 确认 Unity 6000.4.2f1 下 BatchMode 测试命令去掉 `-quit` 后能生成 `unity/Logs/editmode-test-results.xml`。
+  - 新增 `GatherService`，覆盖森林树枝、木屋旁落枝、花种、河岸石子、河贝和浅水河贝等基础材料采集点。
+  - 新增 `FishingService`，覆盖河水鱼影和浅水鱼影钓鱼点。
+  - 新增 4 个 EditMode 测试，覆盖采集成功、采集未知节点失败、钓鱼成功、非钓鱼节点失败；当前 EditMode 测试 8/8 Passed。
+- 修改意图：补齐阶段 3 单主地图资源节点进入场景前的纯逻辑层，使“森林/河岸/河水 -> 基础材料 -> 木牌兑换/建设”的因果链可测试。
+
+## 2026-04-13 体验节奏口径修正
+- 日期/时间：2026-04-13
+- 涉及文件：`implementation_plan.md`、`PROJECT_ARCHITECTURE_UPDATE.md`、`notes.txt`
+- 核心 Diff 摘要：
+  - 将“5 分钟闭环”从强制目标改为低压力体验校验，不作为任务限制或固定推进节奏。
+  - 明确短流程探索游戏只借鉴目标可见、失败低惩罚和非强制引导方法。
+  - 将游戏机入口调整为“发现后的菜单入口”，玩家可自主选择进入像素小游戏。
+- 修改意图：避免把自由探索家园冒险做成限时任务链，保持动森式温和引导和玩家自主节奏。
+
+## 2026-04-13 游戏机菜单入口逻辑
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Core/PlayerState.cs`、`unity/Assets/Scripts/Core/GameConstants.cs`、`unity/Assets/Scripts/MiniGame/`、`unity/Assets/Tests/EditMode/MiniGameServiceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 为 `PlayerState` 增加 `KnownSystems`、`UnlockedMiniGames` 和 `ActiveMiniGameId`，用于表达发现入口、菜单可用和当前小游戏状态。
+  - 新增 `MiniGameService`，支持发现游戏机菜单入口、开始小游戏、完成小游戏并回收贴纸墙奖励。
+  - 新增 `MiniGameResult`，记录小游戏 ID、是否成功和贴纸收集数量。
+  - 新增 4 个 EditMode 测试，覆盖发现菜单入口、未发现入口不能开始、缺少旧卡带不能开始、成功完成后贴纸墙更新。
+  - 当前 EditMode 测试 12/12 Passed。
+- 修改意图：把游戏机从固定路线任务节点调整为“发现后菜单入口”，保持玩家自主选择，同时保留旧卡带和贴纸墙的状态闭环。
+
+## 2026-04-13 WorldNodeService 节点路由
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/World/Nodes/WorldNodeService.cs`、`unity/Assets/Tests/EditMode/WorldNodeServiceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `WorldNodeService.Interact(state, nodeId)`，将世界节点交互路由到采集、钓鱼或游戏机菜单发现。
+  - 新增 4 个 EditMode 测试，覆盖资源节点、钓鱼节点、游戏机发现和未知节点失败分支。
+  - 当前 EditMode 测试 16/16 Passed。
+- 修改意图：为后续 `WorldHub` 单主地图的 MonoBehaviour 节点接入提供稳定服务层，避免把业务状态写死在场景对象里。
+
+## 2026-04-13 SaveService 与 TimeService
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Save/`、`unity/Assets/Scripts/World/TimeService.cs`、`unity/Assets/Tests/EditMode/SaveServiceTests.cs`、`unity/Assets/Tests/EditMode/TimeServiceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `SaveService` 与 `SaveLoadResult`，使用显式 DTO 保存 `PlayerState` 的物品、图纸、已放置建设物、已发现系统、已解锁小游戏、当前小游戏、建设计数、自建解锁、已完成小游戏和贴纸墙数量。
+  - 新增本地 JSON round-trip 测试和缺失存档失败测试。
+  - 新增 `TimeService`，支持清晨、午后、夜晚三段切换和氛围提示，不影响库存或资源产出。
+  - 新增 2 个时间状态测试；当前 EditMode 测试 22/22 Passed。
+- 修改意图：补齐阶段 2/3 的存档落点和时间状态接口，让后续 UI 与场景节点接入时有可测服务，而不是只靠临时场景对象保存状态。
+
+## 2026-04-13 Unity EditMode 自动测试脚本
+- 日期/时间：2026-04-13
+- 涉及文件：`tools/run-unity-editmode-tests.ps1`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 PowerShell 自动测试脚本，默认使用 `D:\unity\Editor\Unity.exe` 和仓库内 `unity/` 工程。
+  - 脚本运行 `-batchmode -runTests -testPlatform editmode`，不附加 `-quit`，因为 Unity Test Runner 会在完成后自行退出。
+  - 脚本等待 `unity/Logs/editmode-test-results.xml` 写入并解析 XML，通过失败数决定退出码。
+  - 已验证脚本输出 `Unity EditMode tests: 22/22 passed, 0 failed.`。
+- 修改意图：把已确认可用的测试命令固化为自动化入口，减少后续阶段误用命令导致“退出码 0 但没有测试 XML”的风险。
+
+## 2026-04-13 GameState 与 WorldNodeInteractor
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Core/GameState.cs`、`unity/Assets/Scripts/World/Nodes/WorldNodeInteractor.cs`、`unity/Assets/Tests/EditMode/GameStateTests.cs`、`unity/Assets/Tests/EditMode/WorldNodeInteractorTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `GameState`，统一持有 `PlayerState` 以及库存、木牌、图纸、建设、自建、采集、钓鱼、小游戏、世界节点、时间和存档服务。
+  - 新增 `WorldNodeInteractor` MonoBehaviour，场景节点只配置 `nodeId`、显示名和提示语，再把交互转发给 `GameState`。
+  - 新增 4 个 EditMode 测试，覆盖 `GameState` 世界节点路由、小游戏菜单入口闭环、未配置节点失败和已配置节点成功转发。
+  - 自动脚本验证 EditMode 测试 26/26 Passed。
+- 修改意图：为阶段 3 `WorldHub` 单主地图节点接入准备薄组件层，保持业务逻辑集中在可测试服务中。
+
+## 2026-04-13 木牌入口与初始图纸
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Signboard/SignboardService.cs`、`unity/Assets/Scripts/Core/GameConstants.cs`、`unity/Assets/Scripts/Core/GameState.cs`、`unity/Assets/Scripts/World/Nodes/WorldNodeService.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`unity/Assets/Tests/EditMode/WorldNodeServiceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `GameConstants.SignboardSystemId`。
+  - 新增 `SignboardService.Open`，打开木牌时写入 `KnownSystems` 并赠送木桥、花圃、林间路牌初始图纸。
+  - `GameState` 复用同一个 `BlueprintService` 初始化木牌与建设服务，避免图纸解锁状态分裂。
+  - `WorldNodeService` 接入 `home-signboard` 节点路由。
+  - 新增 2 个 EditMode 测试，覆盖木牌打开和世界节点路由；自动脚本验证 EditMode 28/28 Passed。
+- 修改意图：把木屋前木牌落地为温和系统入口和图纸赠送点，不做任务列表，同时让后续场景节点可以直接触发。
+
+## 2026-04-13 建设放置失败分支
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Building/BuildService.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `BuildService.CanPlace`，统一检查负数网格、图纸是否解锁、建设配方是否存在、目标格是否占用、材料是否足够。
+  - `BuildService.Place` 改为先检查再扣材料，失败分支不消耗物资、不增加 `BuiltCount`。
+  - 新增 2 个 EditMode 测试，覆盖占用格拒绝和负数网格拒绝。
+  - 自动脚本验证 EditMode 30/30 Passed。
+- 修改意图：补齐单主地图摆放的最低安全规则，避免建设只成为菜单数值变化，保证放置反馈和状态写入可控。
+
+## 2026-04-13 自建建筑受控放置
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Building/CustomBuildService.cs`、`unity/Assets/Scripts/Core/GameState.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - `CustomBuildService` 改为依赖 `InventoryService`，创建自建建筑时按材料主题和尺寸消耗资源。
+  - 新增解锁、空配置、负数网格、占位和材料不足检查；失败时不扣材料、不写入建设物。
+  - 成功时写入结构化 `CustomBuildingData` 并增加 `BuiltCount`。
+  - 新增 2 个 EditMode 测试，覆盖主题材料消耗和占位失败不扣材料。
+  - 自动脚本验证 EditMode 32/32 Passed。
+- 修改意图：让“受控自建建筑物”符合单主地图摆放、材料因果链和存档结构要求，而不是无成本临时装饰。
+
+## 2026-04-13 图纸进度赠送
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Building/BlueprintService.cs`、`unity/Assets/Scripts/Building/BuildService.cs`、`unity/Assets/Scripts/MiniGame/MiniGameService.cs`、`unity/Assets/Scripts/Core/GameState.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`unity/Assets/Tests/EditMode/MiniGameServiceTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - `BlueprintService` 新增修桥后图纸赠送和小游戏完成后图纸赠送。
+  - `BuildService` 放置木桥后解锁木栅栏与河岸灯图纸。
+  - `MiniGameService` 成功完成小游戏后解锁贴纸墙与游戏机底座图纸。
+  - 新增/更新 EditMode 测试覆盖图纸赠送；自动脚本验证 EditMode 33/33 Passed。
+- 修改意图：让图纸机制从初始赠送扩展到进度触发，支撑温和引导和家园持续建设，不使用任务列表推进。
+
+## 2026-04-13 木牌兑换可用性查询
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Signboard/SignboardService.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `SignboardService.GetExchangeRecipes`，为后续木牌 UI 提供兑换项列表。
+  - 新增 `SignboardService.CanExchange`，根据库存判断兑换项是否可用。
+  - 新增 EditMode 测试覆盖材料不足和材料满足时的可兑换状态；自动脚本验证 EditMode 34/34 Passed。
+- 修改意图：让木牌 UI 后续只呈现生活化“可换/材料不足”状态，不复制业务规则，不退化成任务清单或后台表格。
+
+## 2026-04-13 续传执行口径记录
+- 日期/时间：2026-04-13
+- 涉及文件：`notes.txt`、`diff.md`
+- 核心 Diff 摘要：
+  - 记录用户确认的续传方式：休息期间继续推进 Unity 主线；最终阶段按 `implementation_plan.md` 的计划最终阶段理解。
+  - 记录中间阶段节奏：实现、最小测试、review 后再进入提交处理。
+  - 记录上下文或额度边界处理：先写入当前阶段、变更文件、测试命令、测试结果和下一步；后续恢复先读取根目录必读文档。
+- 修改意图：保证长时间续传时不会丢失项目口径、测试状态和下一步任务。
