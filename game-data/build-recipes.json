@@ -1,12 +1,12 @@
 {
     "recipes": [
-        { "id": "bridge", "label": "木桥", "cost": { "wood": 1 }, "unlocks": ["clearing"] },
-        { "id": "flower-bed", "label": "花圃", "cost": { "flowerSeed": 2, "stone": 1 }, "unlocks": ["yard-beauty"] },
-        { "id": "wood-fence", "label": "木栅栏", "cost": { "wood": 2 }, "unlocks": ["yard-boundary"] },
-        { "id": "craft-bench", "label": "工作台", "cost": { "wood": 2, "stone": 1 }, "unlocks": ["building-list"] },
-        { "id": "river-lamp", "label": "河岸灯", "cost": { "wood": 1, "starCore": 1 }, "unlocks": ["night-guidance"] },
-        { "id": "sticker-wall", "label": "贴纸墙", "cost": { "sticker": 3 }, "unlocks": ["home-memory"] },
-        { "id": "arcade-base", "label": "游戏机底座", "cost": { "stone": 2, "starCore": 1 }, "unlocks": ["arcade-focus"] },
-        { "id": "forest-sign", "label": "林间路牌", "cost": { "wood": 1, "shard": 1 }, "unlocks": ["soft-guidance"] }
+        { "id": "bridge", "label": "木桥", "cost": { "wood": 1 }, "slot": "river-crossing", "feedback": "桥板补齐，空地可达", "unlocks": ["clearing"] },
+        { "id": "flower-bed", "label": "花圃", "cost": { "flowerSeed": 2, "stone": 1 }, "slot": "home-yard", "feedback": "木屋旁出现小花", "unlocks": ["yard-beauty"] },
+        { "id": "wood-fence", "label": "木栅栏", "cost": { "wood": 2 }, "slot": "home-yard-edge", "feedback": "庭院边界变清楚", "unlocks": ["yard-boundary"] },
+        { "id": "craft-bench", "label": "工作台", "cost": { "wood": 2, "stone": 1 }, "slot": "home-yard", "feedback": "建设清单展开", "unlocks": ["building-list"] },
+        { "id": "river-lamp", "label": "河岸灯", "cost": { "wood": 1, "starCore": 1 }, "slot": "river-bank", "feedback": "夜晚河岸出现暖光", "unlocks": ["night-guidance"] },
+        { "id": "sticker-wall", "label": "贴纸墙", "cost": { "sticker": 3 }, "slot": "cabin-wall", "feedback": "贴纸图案新增", "unlocks": ["home-memory"] },
+        { "id": "arcade-base", "label": "游戏机底座", "cost": { "stone": 2, "starCore": 1 }, "slot": "clearing", "feedback": "游戏机入口更醒目", "unlocks": ["arcade-focus"] },
+        { "id": "forest-sign", "label": "林间路牌", "cost": { "wood": 1, "shard": 1 }, "slot": "forest-entry", "feedback": "森林入口出现轻提示", "unlocks": ["soft-guidance"] }
     ]
 }

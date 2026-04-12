@@ -5,6 +5,10 @@
         { "id": "forest-shard", "label": "表情碎片", "type": "resource", "resourceId": "shard" },
         { "id": "river-bridge", "label": "半损坏木桥", "type": "building", "recipeId": "bridge" },
         { "id": "clearing-arcade", "label": "空地游戏机", "type": "arcade", "requires": ["river-bridge"] },
-        { "id": "sticker-wall", "label": "贴纸墙", "type": "building", "recipeId": "sticker-wall" }
+        { "id": "sticker-wall", "label": "贴纸墙", "type": "building", "recipeId": "sticker-wall" },
+        { "id": "flower-bed-slot", "label": "花圃空位", "type": "building", "recipeId": "flower-bed" },
+        { "id": "craft-bench-slot", "label": "工作台空位", "type": "building", "recipeId": "craft-bench" },
+        { "id": "river-lamp-slot", "label": "河岸灯空位", "type": "building", "recipeId": "river-lamp" },
+        { "id": "forest-sign-slot", "label": "林间路牌空位", "type": "building", "recipeId": "forest-sign" }
     ]
 }
