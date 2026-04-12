@@ -53,3 +53,15 @@
   - 补齐建设清单：木桥、花圃、木栅栏、工作台、河岸灯、贴纸墙、游戏机底座、林间路牌。
   - 增加 AI 生成素材和开源素材的审核规则：必须记录提示词或来源、许可证、用途，未授权素材不得入库。
 - 修改意图：把用户提出的自由探索、家园建设、固定资源领域、可调时间和素材 review 要求转化为可实现的设计与技术规范。
+
+## 2026-04-12 星绪森林命名与工程骨架更新
+- 日期/时间：2026-04-12
+- 涉及文件：`README.md`、`index.html`、`PROJECT_AUDIT_REPORT.md`、`implementation_plan.md`、`project_structure.md`、`.gitignore`、`assets/`、`game-data/`、`unity/`、`doc/README.md`
+- 核心 Diff 摘要：
+  - 游戏名称统一修改为《星绪森林》。
+  - 项目定位明确为“不做大地图，但实现完整玩法并可扩展”。
+  - 新增 Unity 工程骨架目录，包含场景、脚本、资源、ScriptableObject 配置入口。
+  - 新增 `game-data/`，提前规划资源、建设配方和世界节点数据。
+  - 新增素材投放目录、提示词、来源记录和开源素材候选来源文件。
+  - 新增本地 `doc/unity_newbie_guide.md` 和 `doc/asset_pipeline.md`，并通过 `.gitignore` 设置 `doc/` 大多数详细文档不上传 git，仅保留 `doc/README.md` 索引。
+- 修改意图：为后续正式实现打好工程结构、素材流程、Unity 新手协作流程和版本控制边界。

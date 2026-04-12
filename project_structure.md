@@ -16,10 +16,15 @@
 - `doc/`：设计文档目录。
 
 ## `doc/` 目录
+`doc/` 目录用于保存本地详细设计资料。按照当前 git 策略，大多数详细文档不上传远端，只上传 `doc/README.md` 作为索引。
+
+本地详细文档包括：
 - `design_document.md`：游戏整体设计规划，覆盖玩法、交互、UI、接口、数据结构和验收标准。
 - `level_sketches.md`：核心玩法与关卡草图，覆盖地图、节点、动线、触发条件、反馈和数据变化。
 - `interaction_technical_spec.md`：玩家行为路径、状态变化、接口和 Unity 拆分。
 - `visual_alignment_standard.md`：画面对齐方法、80 分通过标准和三轮 review。
+- `unity_newbie_guide.md`：Unity 新手注册、安装、授权和协作指南。
+- `asset_pipeline.md`：素材生成、开源素材和许可证记录流程。
 
 ## 后续 Unity 工程建议
 后续实现时建议新增 `unity/` 目录，但本轮只做规划与网页概念演示，不提前创建空工程。

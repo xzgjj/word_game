@@ -1,0 +1,12 @@
+{
+    "recipes": [
+        { "id": "bridge", "label": "木桥", "cost": { "wood": 1 }, "unlocks": ["clearing"] },
+        { "id": "flower-bed", "label": "花圃", "cost": { "flowerSeed": 2, "stone": 1 }, "unlocks": ["yard-beauty"] },
+        { "id": "wood-fence", "label": "木栅栏", "cost": { "wood": 2 }, "unlocks": ["yard-boundary"] },
+        { "id": "craft-bench", "label": "工作台", "cost": { "wood": 2, "stone": 1 }, "unlocks": ["building-list"] },
+        { "id": "river-lamp", "label": "河岸灯", "cost": { "wood": 1, "starCore": 1 }, "unlocks": ["night-guidance"] },
+        { "id": "sticker-wall", "label": "贴纸墙", "cost": { "sticker": 3 }, "unlocks": ["home-memory"] },
+        { "id": "arcade-base", "label": "游戏机底座", "cost": { "stone": 2, "starCore": 1 }, "unlocks": ["arcade-focus"] },
+        { "id": "forest-sign", "label": "林间路牌", "cost": { "wood": 1, "shard": 1 }, "unlocks": ["soft-guidance"] }
+    ]
+}

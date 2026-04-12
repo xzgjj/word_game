@@ -1,0 +1,10 @@
+{
+    "nodes": [
+        { "id": "home-yard", "label": "木屋周围", "type": "home", "stateKey": "homeArea.inspected" },
+        { "id": "forest-branch", "label": "森林树枝", "type": "resource", "resourceId": "wood" },
+        { "id": "forest-shard", "label": "表情碎片", "type": "resource", "resourceId": "shard" },
+        { "id": "river-bridge", "label": "半损坏木桥", "type": "building", "recipeId": "bridge" },
+        { "id": "clearing-arcade", "label": "空地游戏机", "type": "arcade", "requires": ["river-bridge"] },
+        { "id": "sticker-wall", "label": "贴纸墙", "type": "building", "recipeId": "sticker-wall" }
+    ]
+}

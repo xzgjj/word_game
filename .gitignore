@@ -17,6 +17,10 @@ out/
 # Logs
 *.log
 
+# Local design docs
+doc/*
+!doc/README.md
+
 # OS
 .DS_Store
 Thumbs.db
