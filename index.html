@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>表情探索：情绪小镇</title>
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+    <div class="app-shell">
+        <header class="topbar" aria-label="游戏状态">
+            <div>
+                <p class="eyebrow">现代情绪冒险 / 网页概念演示</p>
+                <h1>表情探索：情绪小镇</h1>
+            </div>
+            <div class="status-panel" aria-live="polite">
+                <span id="locationLabel">木屋前</span>
+                <span id="objectiveLabel">目标：去空地看看发光的游戏机</span>
+                <span id="inventoryLabel">木材 0 / 贴纸 0 / 碎片 0</span>
+            </div>
+        </header>
+
+        <main class="game-layout">
+            <section class="world-board" aria-label="主世界小地图">
+                <div class="skyline">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+                <div class="river" aria-hidden="true"></div>
+                <div class="bridge" id="bridgeNode">木桥</div>
+                <button class="map-node cabin" data-action="home" type="button">
+                    <span class="node-icon">⌂</span>
+                    <span>木屋</span>
+                </button>
+                <button class="map-node forest" data-action="forage" type="button">
+                    <span class="tree-row">♣ ♣ ♣</span>
+                    <span>旁友森林</span>
+                </button>
+                <button class="map-node arcade" data-action="arcade" type="button">
+                    <span class="arcade-screen">PIX</span>
+                    <span>空地游戏机</span>
+                </button>
+                <div class="avatar-token" id="avatarToken">😄</div>
+                <div class="prompt-bubble" id="promptBubble">从木屋出发，先去森林拾取木材。</div>
+            </section>
+
+            <aside class="control-surface" aria-label="交互控制">
+                <section>
+                    <p class="panel-kicker">情绪能力</p>
+                    <div class="mode-buttons">
+                        <button class="mode-button active" type="button" data-mode="joy">欢笑 / 冲刺</button>
+                        <button class="mode-button" type="button" data-mode="calm">安静 / 漂浮</button>
+                        <button class="mode-button" type="button" data-mode="hype">激动 / 高跳</button>
+                    </div>
+                    <p class="mode-desc" id="modeDesc">欢笑模式：短冲刺，适合越过一格缺口和快速拾取。</p>
+                </section>
+
+                <section>
+                    <p class="panel-kicker">流程推进</p>
+                    <div class="step-list" id="stepList">
+                        <span class="done">木屋前出生</span>
+                        <span>森林拾取</span>
+                        <span>修桥过河</span>
+                        <span>进入像素模式</span>
+                        <span>贴纸墙更新</span>
+                    </div>
+                </section>
+
+                <section class="pixel-stage" id="pixelStage" aria-label="像素小游戏预览">
+                    <div class="pixel-hud">像素模式 <span id="stickerCounter">贴纸 0/3</span></div>
+                    <div class="pixel-hero" id="pixelHero">😄</div>
+                    <div class="pixel-platform p1"></div>
+                    <div class="pixel-platform p2"></div>
+                    <button class="sticker s1" type="button" data-sticker="1">贴纸</button>
+                    <button class="sticker s2" type="button" data-sticker="2">贴纸</button>
+                    <button class="sticker s3" type="button" data-sticker="3">贴纸</button>
+                    <button class="exit-door" id="exitDoor" type="button">出口</button>
+                </div>
+            </aside>
+        </main>
+
+        <section class="design-notes" aria-label="对标验收">
+            <article>
+                <h2>画面对齐</h2>
+                <p>近景保留小岛生活感，中景用木材、河流和桥表达采集与微建造，远景用光幕和灯牌表达现代感。游戏机是空地中心的最强入口。</p>
+            </article>
+            <article>
+                <h2>实现边界</h2>
+                <p>本页只验证小地图闭环：拾取、修桥、确认进入、像素化、完成返回。后续桌面版用 Unity 同一工程打包 Windows 和 macOS。</p>
+            </article>
+        </section>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>
