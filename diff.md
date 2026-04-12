@@ -245,6 +245,33 @@
   - 自动脚本验证 EditMode 39/39 Passed。
 - 修改意图：为阶段 3 的靠近提示和温和引导打基础，让节点提示是场景生活短句，不是任务列表。
 
+## 2026-04-13 建设节点接入 WorldHub
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/World/Nodes/WorldNodeService.cs`、`unity/Assets/Editor/WorldHubSceneBuilder.cs`、`unity/Assets/Scenes/WorldHub.unity`、`unity/Assets/Tests/EditMode/WorldNodeServiceTests.cs`、`unity/Assets/Tests/EditMode/WorldHubSceneTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - `WorldNodeService` 接入建设节点：`river-bridge`、`flower-bed-slot`、`forest-sign-slot`、`craft-bench-slot`、`river-lamp-slot`、`arcade-base-slot`。
+  - `WorldHubSceneBuilder` 把半损坏木桥改为可交互建设节点，并新增花圃、林间路牌、河岸灯和游戏机底座空位。
+  - 更新场景结构测试和世界节点测试；自动脚本验证 EditMode 40/40 Passed。
+- 修改意图：让阶段 4 的建设闭环开始进入单主地图节点层，保持“材料 -> 图纸 -> 放置”的因果链，不做任务列表。
+
+## 2026-04-13 木牌菜单快照
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Signboard/SignboardMenuSnapshot.cs`、`unity/Assets/Scripts/Signboard/SignboardService.cs`、`unity/Assets/Tests/EditMode/CoreServicesTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `SignboardMenuSnapshot` 和 `ExchangeRecipeAvailability`，表达木牌 UI 所需的小镇记录、兑换项可用性、已解锁图纸和自建入口状态。
+  - `SignboardService.GetMenuSnapshot` 统一生成快照，避免后续 UI 复制配方和状态判断。
+  - 新增 EditMode 测试覆盖建设数量、自建解锁、图纸和兑换可用性；自动脚本验证 EditMode 41/41 Passed。
+- 修改意图：为木牌生活化 UI 提供稳定数据接口，让它像小镇工具和记录，而不是任务清单或后台表格。
+
+## 2026-04-13 阶段 4 提交与推送状态
+- 日期/时间：2026-04-13
+- 涉及文件：`notes.txt`
+- 核心 Diff 摘要：
+  - 阶段 4 本地分支 `stage-4-build-signboard-loop` 已提交 `2dc792c Connect build nodes and signboard menu`。
+  - 提交前自动脚本验证 EditMode 41/41 Passed。
+  - 推送远端连续两次失败，错误为 SSH `kex_exchange_identification: read: Software caused connection abort`。
+- 修改意图：记录阶段提交已完成但远端推送受网络/SSH 连接阻塞，便于后续恢复时继续。
+
 ## 2026-04-13 续传执行口径记录
 - 日期/时间：2026-04-13
 - 涉及文件：`notes.txt`、`diff.md`

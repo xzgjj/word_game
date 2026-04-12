@@ -35,7 +35,12 @@ namespace StarryForest.Tests.EditMode
             AssertNode("RiverStoneNode", "river-stone");
             AssertNode("RiverShellNode", "river-shell");
             AssertNode("RiverFishNode", "river-fish");
+            AssertNode("DamagedBridge", "river-bridge");
+            AssertNode("FlowerBedSlot", "flower-bed-slot");
+            AssertNode("ForestSignSlot", "forest-sign-slot");
+            AssertNode("RiverLampSlot", "river-lamp-slot");
             AssertNode("ArcadeMachine", "clearing-arcade");
+            AssertNode("ArcadeBaseSlot", "arcade-base-slot");
             Assert.IsNotNull(GameObject.Find("Player").GetComponent<PlayerController>());
         }
 

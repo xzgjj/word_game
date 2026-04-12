@@ -91,6 +91,21 @@ namespace StarryForest.Signboard
                 && inventoryService.CanAfford(state, recipe.Cost);
         }
 
+        public SignboardMenuSnapshot GetMenuSnapshot(PlayerState state)
+        {
+            List<ExchangeRecipeAvailability> recipes = new List<ExchangeRecipeAvailability>();
+            foreach (ExchangeRecipe recipe in exchangeRecipes.Values)
+            {
+                recipes.Add(new ExchangeRecipeAvailability(recipe, inventoryService.CanAfford(state, recipe.Cost)));
+            }
+
+            return new SignboardMenuSnapshot(
+                state.BuiltCount,
+                state.CustomBuildUnlocked,
+                recipes,
+                new List<BlueprintId>(state.UnlockedBlueprints));
+        }
+
         public OperationResult Exchange(PlayerState state, string recipeId)
         {
             if (!exchangeRecipes.TryGetValue(recipeId, out ExchangeRecipe recipe))

@@ -74,6 +74,27 @@ namespace StarryForest.Tests.EditMode
         }
 
         [Test]
+        public void SignboardMenuSnapshotReportsTownRecordAndRecipeAvailability()
+        {
+            PlayerState state = NewState();
+            state.BuiltCount = 3;
+            state.CustomBuildUnlocked = true;
+            state.UnlockedBlueprints.Add(BlueprintId.CustomBuilding);
+            InventoryService inventory = new InventoryService();
+            inventory.Add(state, ItemId.Wood, 1);
+            inventory.Add(state, ItemId.FlowerSeed, 1);
+            SignboardService signboard = new SignboardService(inventory);
+
+            SignboardMenuSnapshot snapshot = signboard.GetMenuSnapshot(state);
+
+            Assert.AreEqual(3, snapshot.BuiltCount);
+            Assert.IsTrue(snapshot.CustomBuildUnlocked);
+            CollectionAssert.Contains(snapshot.UnlockedBlueprints, BlueprintId.CustomBuilding);
+            Assert.IsTrue(snapshot.ExchangeRecipes.Count > 0);
+            Assert.IsTrue(snapshot.ExchangeRecipes[0].CanExchange);
+        }
+
+        [Test]
         public void PlacingThreeBuildingsUnlocksCustomBuilding()
         {
             PlayerState state = NewState();

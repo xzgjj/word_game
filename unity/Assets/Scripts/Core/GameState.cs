@@ -25,7 +25,7 @@ namespace StarryForest.Core
             Gather = new GatherService(Inventory);
             Fishing = new FishingService(Inventory);
             MiniGames = new MiniGameService(Inventory, Blueprints);
-            WorldNodes = new WorldNodeService(Gather, Fishing, MiniGames, Signboard);
+            WorldNodes = new WorldNodeService(Gather, Fishing, MiniGames, Signboard, Builder);
             Time = new TimeService();
             Save = new SaveService();
         }

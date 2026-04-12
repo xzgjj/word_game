@@ -81,8 +81,12 @@ namespace StarryForest.EditorTools
 
         private static void CreateBridge(Transform root)
         {
-            GameObject bridge = CreateCube("DamagedBridge", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.25f, 0.8f), new Color(0.52f, 0.34f, 0.19f));
+            GameObject bridge = CreateNode("DamagedBridge", "river-bridge", "半损坏木桥", "修一下木桥", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.25f, 0.8f), new Color(0.52f, 0.34f, 0.19f));
             bridge.transform.SetParent(root);
+
+            CreateNode("FlowerBedSlot", "flower-bed-slot", "花圃空位", "摆放花圃", new Vector3(-5f, 0.08f, -4.4f), new Vector3(1.1f, 0.16f, 0.8f), new Color(0.75f, 0.58f, 0.68f)).transform.SetParent(root);
+            CreateNode("ForestSignSlot", "forest-sign-slot", "林间路牌空位", "立一块路牌", new Vector3(-3.4f, 0.25f, 0.1f), new Vector3(0.5f, 0.5f, 0.18f), new Color(0.62f, 0.43f, 0.22f)).transform.SetParent(root);
+            CreateNode("RiverLampSlot", "river-lamp-slot", "河岸灯空位", "放一盏河岸灯", new Vector3(2.3f, 0.35f, 1.8f), new Vector3(0.35f, 0.7f, 0.35f), new Color(0.95f, 0.82f, 0.36f)).transform.SetParent(root);
         }
 
         private static void CreateArcadeClearing(Transform root)
@@ -91,6 +95,7 @@ namespace StarryForest.EditorTools
             clearing.transform.SetParent(root);
 
             CreateNode("ArcadeMachine", "clearing-arcade", "空地游戏机", "打开游戏机菜单", new Vector3(5.8f, 0.7f, -2.5f), new Vector3(0.9f, 1.4f, 0.7f), new Color(0.18f, 0.2f, 0.28f)).transform.SetParent(root);
+            CreateNode("ArcadeBaseSlot", "arcade-base-slot", "游戏机底座空位", "搭一个底座", new Vector3(5.8f, 0.08f, -3.2f), new Vector3(1.4f, 0.16f, 1.0f), new Color(0.4f, 0.42f, 0.5f)).transform.SetParent(root);
         }
 
         private static void CreateDistantLightScreen(Transform root)

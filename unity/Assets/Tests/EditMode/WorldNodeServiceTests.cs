@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using StarryForest.Core;
+using StarryForest.Building;
 using StarryForest.Inventory;
 using StarryForest.MiniGame;
 using StarryForest.Signboard;
@@ -76,13 +77,32 @@ namespace StarryForest.Tests.EditMode
             Assert.IsFalse(result.Success);
         }
 
-        private static WorldNodeService NewWorldNodeService(InventoryService inventory)
+        [Test]
+        public void InteractWithBridgeNodePlacesBridge()
         {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            BlueprintService blueprints = new BlueprintService();
+            WorldNodeService worldNodes = NewWorldNodeService(inventory, blueprints);
+            blueprints.GrantInitialBlueprints(state);
+            inventory.Add(state, ItemId.Wood, 1);
+
+            OperationResult result = worldNodes.Interact(state, "river-bridge");
+
+            Assert.IsTrue(result.Success, result.Message);
+            Assert.AreEqual(1, state.BuiltCount);
+            Assert.AreEqual(BlueprintId.Bridge, state.PlacedBuildings[0].BlueprintId);
+        }
+
+        private static WorldNodeService NewWorldNodeService(InventoryService inventory, BlueprintService blueprints = null)
+        {
+            BlueprintService blueprintService = blueprints ?? new BlueprintService();
             return new WorldNodeService(
                 new GatherService(inventory),
                 new FishingService(inventory),
                 new MiniGameService(inventory),
-                new SignboardService(inventory));
+                new SignboardService(inventory, blueprintService),
+                new BuildService(inventory, blueprintService));
         }
 
         private static PlayerState NewState()
