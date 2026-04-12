@@ -300,3 +300,15 @@
   - 记录中间阶段节奏：实现、最小测试、review 后再进入提交处理。
   - 记录上下文或额度边界处理：先写入当前阶段、变更文件、测试命令、测试结果和下一步；后续恢复先读取根目录必读文档。
 - 修改意图：保证长时间续传时不会丢失项目口径、测试状态和下一步任务。
+
+## 2026-04-13 阶段 6 自动构建与质量验证
+- 日期/时间：2026-04-13
+- 涉及文件：`tools/build-unity-windows.ps1`、`tools/run-unity-playmode-tests.ps1`、`tools/run-windows-build-smoke.ps1`、`tools/run-stage6-validation.ps1`、`unity/Assets/Editor/BuildAutomation.cs`、`unity/Assets/Tests/PlayMode/`、`unity/Assets/Settings/`、`unity/ProjectSettings/ProjectSettings.asset`、`unity/unity.slnx`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `BuildAutomation.BuildWindows`，通过 Unity `BuildPipeline` 构建 `WorldHub` 与 `MiniGame01` 到 `Builds/Windows/StarryForest.exe`，并在构建失败时抛出异常。
+  - 新增 PlayMode 冒烟测试，运行态加载 `WorldHub` 和 `MiniGame01`，确认主角、木牌、游戏机、远景光幕、贴纸和出口门存在。
+  - 新增 PlayMode 测试脚本、Windows 构建脚本、Windows 构建产物启动冒烟脚本和统一阶段 6 验证脚本。
+  - 修正构建脚本竞态：启动前删除旧日志，避免读取上一轮成功标记；以本轮日志成功标记和构建产物存在作为通过条件。
+  - 保留 Unity 6/URP 导入补全的渲染与 Standalone batching 配置；Unity Services 开启副作用已改回关闭。
+  - 统一验证已通过：EditMode 44/44 Passed，PlayMode 2/2 Passed，Windows x64 构建生成，构建产物启动冒烟通过。
+- 修改意图：完成阶段 6 自动测试、构建和产物可启动验证，让后续提交前有单一稳定质量门禁入口，同时保持网页概念演示最后更新。

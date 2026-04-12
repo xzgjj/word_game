@@ -1,0 +1,19 @@
+{
+    "name": "StarryForest.Tests.PlayMode",
+    "rootNamespace": "StarryForest.Tests.PlayMode",
+    "references": [
+        "StarryForest"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "optionalUnityReferences": [
+        "TestAssemblies"
+    ],
+    "noEngineReferences": false
+}

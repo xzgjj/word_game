@@ -1,5 +1,6 @@
 ﻿<Solution>
   <Project Path="StarryForest.csproj" />
   <Project Path="StarryForest.Tests.EditMode.csproj" />
+  <Project Path="StarryForest.Tests.PlayMode.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
 </Solution>
