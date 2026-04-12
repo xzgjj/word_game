@@ -34,5 +34,20 @@ namespace StarryForest.Tests.EditMode
             Assert.IsTrue(result.Success, result.Message);
             Assert.AreEqual(1, gameState.Inventory.GetCount(gameState.Player, ItemId.RiverShell));
         }
+
+        [Test]
+        public void InteractorReturnsPromptOnlyInRange()
+        {
+            GameObject gameObject = new GameObject("test-node");
+            WorldNodeInteractor interactor = gameObject.AddComponent<WorldNodeInteractor>();
+            interactor.Configure("forest-branch", "森林树枝", "拾取木材");
+
+            string nearPrompt = interactor.GetPrompt(new Vector3(0.5f, 0f, 0f));
+            string farPrompt = interactor.GetPrompt(new Vector3(5f, 0f, 0f));
+
+            Object.DestroyImmediate(gameObject);
+            Assert.AreEqual("拾取木材", nearPrompt);
+            Assert.AreEqual(string.Empty, farPrompt);
+        }
     }
 }

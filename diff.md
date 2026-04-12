@@ -216,6 +216,35 @@
   - 新增 EditMode 测试覆盖材料不足和材料满足时的可兑换状态；自动脚本验证 EditMode 34/34 Passed。
 - 修改意图：让木牌 UI 后续只呈现生活化“可换/材料不足”状态，不复制业务规则，不退化成任务清单或后台表格。
 
+## 2026-04-13 WorldHub 单主地图占位场景
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Editor/WorldHubSceneBuilder.cs`、`unity/Assets/Scenes/WorldHub.unity`、`unity/Assets/Tests/EditMode/WorldHubSceneTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `WorldHubSceneBuilder`，可重复生成 `Assets/Scenes/WorldHub.unity`。
+  - 场景包含木屋、木屋前木牌、森林树群、森林树枝、森林花种、河流、河岸石子、河贝、鱼影、半损坏木桥、空地游戏机、不可到达远景光幕、主相机和方向光。
+  - 关键交互对象挂载 `WorldNodeInteractor`，nodeId 与服务层保持一致。
+  - 新增 2 个 EditMode 场景结构测试，覆盖核心地标和交互节点配置；自动脚本验证 EditMode 36/36 Passed。
+- 修改意图：进入阶段 3 主世界单地图可玩骨架，用占位素材先验证空间关系、节点配置和状态接入，不提前追求最终美术，不更新网页。
+
+## 2026-04-13 主角移动骨架
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/Player/PlayerController.cs`、`unity/Assets/Editor/WorldHubSceneBuilder.cs`、`unity/Assets/Scenes/WorldHub.unity`、`unity/Assets/Tests/EditMode/PlayerControllerTests.cs`、`unity/Assets/Tests/EditMode/WorldHubSceneTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增 `PlayerController`，支持按输入向量在 XZ 平面移动，并钳制输入强度。
+  - `WorldHubSceneBuilder` 在木屋附近生成 Player 占位体并挂载 `PlayerController`。
+  - 更新 `WorldHub` 场景结构测试，确认 Player 和组件存在。
+  - 新增 2 个 EditMode 移动测试；自动脚本验证 EditMode 38/38 Passed。
+- 修改意图：补齐阶段 3 主世界可玩骨架的最小主角控制基础，暂不接复杂输入系统或最终动画。
+
+## 2026-04-13 靠近交互提示
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Scripts/World/Nodes/WorldNodeInteractor.cs`、`unity/Assets/Tests/EditMode/WorldNodeInteractorTests.cs`、`notes.txt`
+- 核心 Diff 摘要：
+  - `WorldNodeInteractor` 新增交互半径、范围判断和提示获取。
+  - 新增 EditMode 测试，覆盖靠近时返回提示、远离时不显示提示。
+  - 自动脚本验证 EditMode 39/39 Passed。
+- 修改意图：为阶段 3 的靠近提示和温和引导打基础，让节点提示是场景生活短句，不是任务列表。
+
 ## 2026-04-13 续传执行口径记录
 - 日期/时间：2026-04-13
 - 涉及文件：`notes.txt`、`diff.md`

@@ -27,4 +27,7 @@
 - 2026-04-13 自建建筑复核：`CustomBuildService` 新增材料主题与尺寸消耗，检查解锁、空配置、负数网格、占位和材料不足；成功写入结构化 `CustomBuildingData` 并增加 `BuiltCount`。自动脚本验证 EditMode 32/32 Passed。
 - 2026-04-13 图纸进度复核：`BlueprintService` 新增修桥后图纸和小游戏完成后图纸；`BuildService` 放置木桥后赠送木栅栏/河岸灯，`MiniGameService` 成功完成后赠送贴纸墙/游戏机底座。自动脚本验证 EditMode 33/33 Passed。
 - 2026-04-13 木牌兑换可用性复核：`SignboardService` 新增 `GetExchangeRecipes` 与 `CanExchange`，后续 UI 可直接显示可换/材料不足，不需要复制配方判断。自动脚本验证 EditMode 34/34 Passed。
+- 2026-04-13 WorldHub 场景骨架复核：新增 `WorldHubSceneBuilder` 并生成 `Assets/Scenes/WorldHub.unity`，包含木屋、木牌、森林资源、河流、河岸资源、半损坏桥、空地游戏机和不可到达远景光幕；关键节点挂 `WorldNodeInteractor`。自动脚本验证 EditMode 36/36 Passed。当前仍是占位美术，不更新网页。
+- 2026-04-13 主角移动骨架复核：新增 `PlayerController`，支持在地面平面按输入向量移动并钳制输入强度；`WorldHubSceneBuilder` 已把 Player 占位体放入木屋附近。自动脚本验证 EditMode 38/38 Passed。
+- 2026-04-13 靠近提示复核：`WorldNodeInteractor` 新增交互半径、`IsInRange` 和 `GetPrompt`，只有玩家进入范围才返回生活化短提示。自动脚本验证 EditMode 39/39 Passed。
 - 2026-04-13 续传执行口径：用户休息期间继续推进 Unity 主线；“最终阶段”按 `implementation_plan.md` 的最终阶段理解，中间阶段按实现、最小测试、review、提交的节奏推进。若上下文或额度接近边界，先把当前阶段、变更文件、测试命令、测试结果、下一步写入 `notes.txt` / `diff.md`；后续恢复必须先读 `AGENT_EXECUTION_PROTOCOL.md`、`CLAUDE.md`、`implementation_plan.md`、`notes.txt`、`diff.md`。
