@@ -13,10 +13,19 @@ using UnityEngine.SceneManagement;
 
 namespace StarryForest.Runtime
 {
+    public enum SystemMenuPanel
+    {
+        Root,
+        Save,
+        Settings,
+        ExitConfirm
+    }
+
     public sealed class GameStateRunner : MonoBehaviour
     {
         private const float MiniGameMoveSpeed = 4.6f;
         private const float AutoArchiveIntervalSeconds = 600f;
+        private const float InteractionFeedbackDurationSeconds = 2.2f;
         private static readonly ItemId[] EquipmentRingItems =
         {
             ItemId.Axe,
@@ -40,7 +49,9 @@ namespace StarryForest.Runtime
         private AudioClip failClip;
         private AudioClip menuClip;
         private bool firstResourceGuideCompleted;
+        private bool feedbackAudioEnabled = true;
         private float autoArchiveTimer;
+        private float interactionFeedbackTimer;
 
         public GameState GameState { get; private set; }
         public PlayerState State => GameState?.Player;
@@ -52,8 +63,16 @@ namespace StarryForest.Runtime
         public bool ShowInventory { get; private set; }
         public bool ShowEquipmentWheel { get; private set; }
         public bool ShowSystemMenu { get; private set; }
+        public SystemMenuPanel ActiveSystemMenuPanel { get; private set; }
         public int InventoryCategoryIndex { get; private set; }
+        public int SystemMenuIndex { get; private set; }
         public int SaveMenuSlotIndex { get; private set; }
+        public int SettingsMenuIndex { get; private set; }
+        public int ExitConfirmIndex { get; private set; }
+        public bool FeedbackAudioEnabled => feedbackAudioEnabled;
+        public string InteractionFeedbackTitle { get; private set; }
+        public string InteractionFeedbackDetail { get; private set; }
+        public bool ShowInteractionFeedback => interactionFeedbackTimer > 0f;
         public IReadOnlyList<ItemId> EquipmentItems => EquipmentRingItems;
         public bool IsMiniGameScene => SceneManager.GetActiveScene().name == "MiniGame01";
         public bool CanStartMiniGame => State != null
@@ -99,6 +118,8 @@ namespace StarryForest.Runtime
             {
                 return;
             }
+
+            UpdateInteractionFeedback();
 
             if (WasPressed(keyboard.escapeKey))
             {
@@ -221,7 +242,7 @@ namespace StarryForest.Runtime
             {
                 if (!firstResourceGuideCompleted && IsResourceNode(CurrentNode.NodeId))
                 {
-                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：按 E 收进背包。之后同类资源不再弹新手说明";
+                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：按 E 或鼠标左键收进背包。之后同类资源不再弹新手说明";
                     return;
                 }
 
@@ -231,7 +252,7 @@ namespace StarryForest.Runtime
                     return;
                 }
 
-                CurrentPrompt = $"{CurrentNode.DisplayLabel}：{GetPromptForNode(CurrentNode)}，按 E";
+                CurrentPrompt = $"{CurrentNode.DisplayLabel}：{GetPromptForNode(CurrentNode)}，按 E 或鼠标左键";
             }
         }
 
@@ -322,7 +343,7 @@ namespace StarryForest.Runtime
                 StartMiniGameFromArcade();
             }
 
-            if (WasPressed(keyboard.eKey))
+            if (WasPressed(keyboard.eKey) || WasMousePrimaryPressed())
             {
                 InteractWithNearestNode();
             }
@@ -333,12 +354,14 @@ namespace StarryForest.Runtime
             if (CurrentNode == null)
             {
                 SetMessage("附近没有可互动的东西。");
+                ShowInteractionFeedbackPanel("没有可互动目标", "再靠近一点，等待提示出现后再点击或按 E。", false);
                 return;
             }
 
             if (IsBuildNodeCompleted(CurrentNode.NodeId))
             {
                 SetMessage(GetCompletedBuildMessage(CurrentNode.NodeId));
+                ShowInteractionFeedbackPanel(CurrentNode.DisplayLabel, GetCompletedBuildMessage(CurrentNode.NodeId), true);
                 RefreshWorldViews();
                 UpdateNearestNode();
                 return;
@@ -356,13 +379,15 @@ namespace StarryForest.Runtime
                 PlayFeedback(menuClip);
             }
 
+            ShowInteractionProgressPanel(CurrentNode.DisplayLabel, GetInteractionStartMessage(CurrentNode.NodeId));
             OperationResult result = CurrentNode.Interact(GameState);
             if (result.Success && IsResourceNode(CurrentNode.NodeId))
             {
                 firstResourceGuideCompleted = true;
             }
 
-            SetResultAndAutosave(result);
+            SetResultAndAutosave(result, false);
+            ShowInteractionFeedbackForResult(CurrentNode, result);
             RefreshWorldViews();
             UpdateNearestNode();
         }
@@ -488,7 +513,7 @@ namespace StarryForest.Runtime
             }
 
             CurrentPrompt = "收齐 3 个贴纸后，靠近出口按 E 回到木屋。";
-            if (WasPressed(keyboard.eKey))
+            if (WasPressed(keyboard.eKey) || WasMousePrimaryPressed())
             {
                 TryMiniGameInteraction();
             }
@@ -560,7 +585,15 @@ namespace StarryForest.Runtime
         {
             if (ShowSystemMenu)
             {
-                ShowSystemMenu = false;
+                if (ActiveSystemMenuPanel == SystemMenuPanel.Root)
+                {
+                    ShowSystemMenu = false;
+                }
+                else
+                {
+                    ActiveSystemMenuPanel = SystemMenuPanel.Root;
+                }
+
                 PlayFeedback(menuClip);
                 return;
             }
@@ -570,11 +603,73 @@ namespace StarryForest.Runtime
             ShowInventory = false;
             ShowEquipmentWheel = false;
             ShowSystemMenu = true;
+            ActiveSystemMenuPanel = SystemMenuPanel.Root;
+            SystemMenuIndex = 0;
             SaveMenuSlotIndex = 0;
+            SettingsMenuIndex = 0;
+            ExitConfirmIndex = 0;
             PlayFeedback(menuClip);
         }
 
         private void UpdateSystemMenuShortcuts(Keyboard keyboard)
+        {
+            switch (ActiveSystemMenuPanel)
+            {
+                case SystemMenuPanel.Save:
+                    UpdateSaveMenuShortcuts(keyboard);
+                    break;
+                case SystemMenuPanel.Settings:
+                    UpdateSettingsMenuShortcuts(keyboard);
+                    break;
+                case SystemMenuPanel.ExitConfirm:
+                    UpdateExitConfirmShortcuts(keyboard);
+                    break;
+                default:
+                    UpdateRootSystemMenuShortcuts(keyboard);
+                    break;
+            }
+        }
+
+        private void UpdateRootSystemMenuShortcuts(Keyboard keyboard)
+        {
+            const int itemCount = 3;
+            if (WasPressed(keyboard.upArrowKey))
+            {
+                SystemMenuIndex = (SystemMenuIndex - 1 + itemCount) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.downArrowKey))
+            {
+                SystemMenuIndex = (SystemMenuIndex + 1) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.enterKey) || WasMousePrimaryPressed())
+            {
+                switch (SystemMenuIndex)
+                {
+                    case 0:
+                        ActiveSystemMenuPanel = SystemMenuPanel.Save;
+                        SaveMenuSlotIndex = 0;
+                        break;
+                    case 1:
+                        ActiveSystemMenuPanel = SystemMenuPanel.Settings;
+                        SettingsMenuIndex = 0;
+                        break;
+                    default:
+                        ActiveSystemMenuPanel = SystemMenuPanel.ExitConfirm;
+                        ExitConfirmIndex = 0;
+                        break;
+                }
+
+                PlayFeedback(menuClip);
+            }
+        }
+
+        private void UpdateSaveMenuShortcuts(Keyboard keyboard)
         {
             IReadOnlyList<SaveSlotSnapshot> slots = GameState.SaveSlots.GetSlots();
             if (slots.Count == 0)
@@ -618,6 +713,69 @@ namespace StarryForest.Runtime
 
             if (WasPressed(keyboard.qKey))
             {
+                ActiveSystemMenuPanel = SystemMenuPanel.Root;
+                PlayFeedback(menuClip);
+            }
+        }
+
+        private void UpdateSettingsMenuShortcuts(Keyboard keyboard)
+        {
+            const int itemCount = 2;
+            if (WasPressed(keyboard.upArrowKey))
+            {
+                SettingsMenuIndex = (SettingsMenuIndex - 1 + itemCount) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.downArrowKey))
+            {
+                SettingsMenuIndex = (SettingsMenuIndex + 1) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.enterKey) || WasMousePrimaryPressed())
+            {
+                if (SettingsMenuIndex == 0)
+                {
+                    feedbackAudioEnabled = !feedbackAudioEnabled;
+                    SetMessage(feedbackAudioEnabled ? "反馈音效已开启。" : "反馈音效已关闭。");
+                    PlayFeedback(menuClip);
+                    return;
+                }
+
+                ActiveSystemMenuPanel = SystemMenuPanel.Root;
+                PlayFeedback(menuClip);
+            }
+        }
+
+        private void UpdateExitConfirmShortcuts(Keyboard keyboard)
+        {
+            const int itemCount = 2;
+            if (WasPressed(keyboard.leftArrowKey) || WasPressed(keyboard.upArrowKey))
+            {
+                ExitConfirmIndex = (ExitConfirmIndex - 1 + itemCount) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.rightArrowKey) || WasPressed(keyboard.downArrowKey))
+            {
+                ExitConfirmIndex = (ExitConfirmIndex + 1) % itemCount;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.enterKey) || WasMousePrimaryPressed())
+            {
+                if (ExitConfirmIndex == 0)
+                {
+                    ActiveSystemMenuPanel = SystemMenuPanel.Root;
+                    PlayFeedback(menuClip);
+                    return;
+                }
+
                 OperationResult saveResult = GameState.SaveSlots.SaveAuto(State);
                 SetResult(saveResult.Success ? OperationResult.Ok("已保存并退出。") : saveResult);
                 if (saveResult.Success)
@@ -666,19 +824,60 @@ namespace StarryForest.Runtime
             SetResult(GameState.SaveSlots.Delete(selectedSlot.SlotId));
         }
 
-        private void SetResultAndAutosave(OperationResult result)
+        private void SetResultAndAutosave(OperationResult result, bool playAudio = true)
         {
-            SetResult(result);
+            SetResult(result, playAudio);
             if (result.Success)
             {
                 AutosaveProgress();
             }
         }
 
-        private void SetResult(OperationResult result)
+        private void SetResult(OperationResult result, bool playAudio = true)
         {
             SetMessage(result.Message);
-            PlayFeedback(result.Success ? successClip : failClip);
+            if (playAudio)
+            {
+                PlayFeedback(result.Success ? successClip : failClip);
+            }
+        }
+
+        private void ShowInteractionFeedbackForResult(WorldNodeInteractor node, OperationResult result)
+        {
+            if (node == null)
+            {
+                ShowInteractionFeedbackPanel(result.Success ? "完成" : "还差一步", result.Message, result.Success);
+                return;
+            }
+
+            string title = result.Success ? GetInteractionSuccessTitle(node.NodeId, result.Message) : GetInteractionFailureTitle(node.NodeId);
+            ShowInteractionFeedbackPanel(title, result.Message, result.Success);
+        }
+
+        private void ShowInteractionFeedbackPanel(string title, string detail, bool success)
+        {
+            InteractionFeedbackTitle = title;
+            InteractionFeedbackDetail = detail;
+            interactionFeedbackTimer = InteractionFeedbackDurationSeconds;
+            PlayFeedback(success ? successClip : failClip);
+        }
+
+        private void ShowInteractionProgressPanel(string title, string detail)
+        {
+            InteractionFeedbackTitle = title;
+            InteractionFeedbackDetail = detail;
+            interactionFeedbackTimer = InteractionFeedbackDurationSeconds;
+            PlayFeedback(menuClip);
+        }
+
+        private void UpdateInteractionFeedback()
+        {
+            if (interactionFeedbackTimer <= 0f)
+            {
+                return;
+            }
+
+            interactionFeedbackTimer = Mathf.Max(0f, interactionFeedbackTimer - Time.deltaTime);
         }
 
         private void AutosaveProgress()
@@ -726,7 +925,7 @@ namespace StarryForest.Runtime
 
         private void PlayFeedback(AudioClip clip)
         {
-            if (audioSource != null && clip != null)
+            if (feedbackAudioEnabled && audioSource != null && clip != null)
             {
                 audioSource.PlayOneShot(clip);
             }
@@ -760,6 +959,71 @@ namespace StarryForest.Runtime
                 || nodeId == "shallow-river-shell"
                 || nodeId == "river-fish"
                 || nodeId == "shallow-fish";
+        }
+
+        private static string GetInteractionStartMessage(string nodeId)
+        {
+            if (nodeId == "river-bridge")
+            {
+                return "开始检查桥桩和木板。";
+            }
+
+            if (nodeId == "flower-bed-slot" || nodeId == "forest-flower-bed-slot")
+            {
+                return "开始整理这块地。";
+            }
+
+            if (nodeId == "home-signboard")
+            {
+                return "打开木牌记录。";
+            }
+
+            if (nodeId == "clearing-arcade")
+            {
+                return "游戏机屏幕亮起来了。";
+            }
+
+            return "开始互动。";
+        }
+
+        private static string GetInteractionSuccessTitle(string nodeId, string message)
+        {
+            if (nodeId == "river-bridge")
+            {
+                if (!string.IsNullOrEmpty(message) && message.Contains("发现了断桥"))
+                {
+                    return "发现断桥";
+                }
+
+                return "桥梁修复完成";
+            }
+
+            if (nodeId == "flower-bed-slot" || nodeId == "forest-flower-bed-slot")
+            {
+                return "地块状态更新";
+            }
+
+            if (IsResourceNode(nodeId))
+            {
+                return "发现物品";
+            }
+
+            return "互动完成";
+        }
+
+        private static string GetInteractionFailureTitle(string nodeId)
+        {
+            if (nodeId == "river-bridge")
+            {
+                return "桥梁还不能修复";
+            }
+
+            if (nodeId == "flower-bed-slot" || nodeId == "forest-flower-bed-slot")
+            {
+                return "地块还不能建设";
+            }
+
+            return "还差一步";
         }
 
         public bool CanEquip(ItemId itemId)
@@ -837,6 +1101,11 @@ namespace StarryForest.Runtime
         private static bool WasPressed(ButtonControl control)
         {
             return control != null && control.wasPressedThisFrame;
+        }
+
+        private static bool WasMousePrimaryPressed()
+        {
+            return Mouse.current?.leftButton.wasPressedThisFrame == true;
         }
     }
 }

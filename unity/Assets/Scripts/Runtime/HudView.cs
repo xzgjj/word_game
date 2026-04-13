@@ -76,6 +76,11 @@ namespace StarryForest.Runtime
                 DrawSystemMenu();
             }
 
+            if (runner.ShowInteractionFeedback)
+            {
+                DrawInteractionFeedback();
+            }
+
             if (runner.ShowArcadeMenu)
             {
                 DrawArcadeMenu();
@@ -205,12 +210,45 @@ namespace StarryForest.Runtime
 
         private void DrawSystemMenu()
         {
+            switch (runner.ActiveSystemMenuPanel)
+            {
+                case SystemMenuPanel.Save:
+                    DrawSaveMenu();
+                    break;
+                case SystemMenuPanel.Settings:
+                    DrawSettingsMenu();
+                    break;
+                case SystemMenuPanel.ExitConfirm:
+                    DrawExitConfirmMenu();
+                    break;
+                default:
+                    DrawSystemRootMenu();
+                    break;
+            }
+        }
+
+        private void DrawSystemRootMenu()
+        {
+            Rect rect = new Rect((Screen.width - 420) * 0.5f, (Screen.height - 270) * 0.5f, 420, 270);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 18, rect.y + 16, rect.width - 36, rect.height - 32));
+            GUILayout.Label("系统菜单", titleStyle);
+            GUILayout.Label("↑ / ↓ 选择，Enter 或鼠标左键确认，Esc 返回。", hintStyle);
+            GUILayout.Space(12);
+            DrawMenuRow(0, runner.SystemMenuIndex, "存档");
+            DrawMenuRow(1, runner.SystemMenuIndex, "游戏设置");
+            DrawMenuRow(2, runner.SystemMenuIndex, "退出游戏");
+            GUILayout.EndArea();
+        }
+
+        private void DrawSaveMenu()
+        {
             IReadOnlyList<SaveSlotSnapshot> slots = runner.GameState.SaveSlots.GetSlots();
             Rect rect = new Rect((Screen.width - 520) * 0.5f, (Screen.height - 340) * 0.5f, 520, 340);
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 18, rect.y + 16, rect.width - 36, rect.height - 32));
-            GUILayout.Label("系统菜单", titleStyle);
-            GUILayout.Label("↑ / ↓ 选择存档，S 保存手动档，L 读取，Delete 删除手动档，Q 保存并退出，Esc 返回。", hintStyle);
+            GUILayout.Label("存档", titleStyle);
+            GUILayout.Label("↑ / ↓ 选择，S 保存手动档，L 读取，Delete 删除手动档，Q 返回上一级。", hintStyle);
             GUILayout.Space(10);
 
             for (int index = 0; index < slots.Count; index++)
@@ -225,6 +263,47 @@ namespace StarryForest.Runtime
             }
 
             GUILayout.EndArea();
+        }
+
+        private void DrawSettingsMenu()
+        {
+            Rect rect = new Rect((Screen.width - 460) * 0.5f, (Screen.height - 260) * 0.5f, 460, 260);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 18, rect.y + 16, rect.width - 36, rect.height - 32));
+            GUILayout.Label("游戏设置", titleStyle);
+            GUILayout.Label("↑ / ↓ 选择，Enter 或鼠标左键调整。", hintStyle);
+            GUILayout.Space(12);
+            DrawMenuRow(0, runner.SettingsMenuIndex, $"反馈音效：{(runner.FeedbackAudioEnabled ? "开" : "关")}");
+            DrawMenuRow(1, runner.SettingsMenuIndex, "返回");
+            GUILayout.EndArea();
+        }
+
+        private void DrawExitConfirmMenu()
+        {
+            Rect rect = new Rect((Screen.width - 460) * 0.5f, (Screen.height - 230) * 0.5f, 460, 230);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 18, rect.y + 16, rect.width - 36, rect.height - 32));
+            GUILayout.Label("退出游戏", titleStyle);
+            GUILayout.Label("退出前会写入自动存档。确定要退出吗？", bodyStyle);
+            GUILayout.Space(12);
+            DrawMenuRow(0, runner.ExitConfirmIndex, "取消，回到系统菜单");
+            DrawMenuRow(1, runner.ExitConfirmIndex, "保存并退出");
+            GUILayout.EndArea();
+        }
+
+        private void DrawInteractionFeedback()
+        {
+            Rect rect = new Rect((Screen.width - 360) * 0.5f, Screen.height - 118, 360, 86);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 14, rect.y + 10, rect.width - 28, rect.height - 20));
+            GUILayout.Label(runner.InteractionFeedbackTitle, titleStyle);
+            GUILayout.Label(runner.InteractionFeedbackDetail, bodyStyle);
+            GUILayout.EndArea();
+        }
+
+        private void DrawMenuRow(int index, int selectedIndex, string label)
+        {
+            GUILayout.Label($"{(index == selectedIndex ? "> " : "  ")}{label}", bodyStyle);
         }
 
         private void DrawArcadeMenu()

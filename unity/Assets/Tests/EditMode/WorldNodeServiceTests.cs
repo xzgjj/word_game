@@ -87,11 +87,59 @@ namespace StarryForest.Tests.EditMode
             blueprints.GrantInitialBlueprints(state);
             inventory.Add(state, ItemId.Wood, 1);
 
+            OperationResult discovery = worldNodes.Interact(state, "river-bridge");
             OperationResult result = worldNodes.Interact(state, "river-bridge");
 
+            Assert.IsTrue(discovery.Success, discovery.Message);
             Assert.IsTrue(result.Success, result.Message);
+            Assert.AreEqual("木桥修好了。现在可以从桥面过河。", result.Message);
             Assert.AreEqual(1, state.BuiltCount);
             Assert.AreEqual(BlueprintId.Bridge, state.PlacedBuildings[0].BlueprintId);
+        }
+
+        [Test]
+        public void InteractWithBridgeFirstDiscoveryGrantsRepairWoodAndThenBuilds()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            BlueprintService blueprints = new BlueprintService();
+            WorldNodeService worldNodes = NewWorldNodeService(inventory, blueprints);
+
+            OperationResult discovery = worldNodes.Interact(state, "river-bridge");
+
+            Assert.IsTrue(discovery.Success, discovery.Message);
+            StringAssert.Contains("备用木板", discovery.Message);
+            Assert.IsTrue(state.UnlockedBlueprints.Contains(BlueprintId.Bridge));
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Wood));
+
+            OperationResult repair = worldNodes.Interact(state, "river-bridge");
+
+            Assert.IsTrue(repair.Success, repair.Message);
+            Assert.AreEqual("木桥修好了。现在可以从桥面过河。", repair.Message);
+            Assert.AreEqual(1, state.BuiltCount);
+            Assert.AreEqual(0, inventory.GetCount(state, ItemId.Wood));
+        }
+
+        [Test]
+        public void InteractWithBridgeAfterGuideReportsMissingWoodIfMaterialWasUsed()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            BlueprintService blueprints = new BlueprintService();
+            WorldNodeService worldNodes = NewWorldNodeService(inventory, blueprints);
+
+            OperationResult discovery = worldNodes.Interact(state, "river-bridge");
+            OperationResult spent = inventory.Spend(state, new System.Collections.Generic.Dictionary<ItemId, int>
+            {
+                { ItemId.Wood, 1 }
+            });
+            OperationResult repair = worldNodes.Interact(state, "river-bridge");
+
+            Assert.IsTrue(discovery.Success, discovery.Message);
+            Assert.IsTrue(spent.Success, spent.Message);
+            Assert.IsFalse(repair.Success);
+            Assert.AreEqual("修桥需要木材 1。先领取今日赠礼、出售物品买木材，或清理落枝。", repair.Message);
+            Assert.AreEqual(0, state.BuiltCount);
         }
 
         [Test]

@@ -55,6 +55,25 @@ MemoryCaptures/
 # Local screenshots and reference images
 *.png
 tmp-*.png
+tmp-*.jpg
+tmp-*.jpeg
+tmp-*.webp
+mcp-*.png
+mcp-*.jpg
+mcp-*.jpeg
+mcp-*.webp
+chrome-mcp-*.png
+chrome-mcp-*.jpg
+chrome-mcp-*.jpeg
+chrome-mcp-*.webp
+capture-*.png
+capture-*.jpg
+capture-*.jpeg
+capture-*.webp
+screenshot-*.png
+screenshot-*.jpg
+screenshot-*.jpeg
+screenshot-*.webp
 
 # Local configuration and documentation files (不上传的本地文档)
 CLAUDE.md

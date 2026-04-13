@@ -11,6 +11,7 @@ namespace StarryForest.World.Nodes
     {
         private const string ArcadeNodeId = "clearing-arcade";
         private const string SignboardNodeId = "home-signboard";
+        private const string BridgeRepairGuideId = "bridge-repair-guide";
 
         private readonly GatherService gatherService;
         private readonly FishingService fishingService;
@@ -59,12 +60,29 @@ namespace StarryForest.World.Nodes
 
             if (buildService != null && TryGetBuildNode(nodeId, out BlueprintId blueprintId, out int gridX, out int gridY))
             {
+                if (nodeId == "river-bridge" && !state.KnownSystems.Contains(BridgeRepairGuideId))
+                {
+                    return DiscoverBridgeRepairGuide(state);
+                }
+
                 if (IsClearableFlowerBedSlot(nodeId) && GetWorldNodeStage(state, nodeId) < 3)
                 {
                     return ClearFlowerBedSlot(state, nodeId);
                 }
 
-                return buildService.Place(state, blueprintId, gridX, gridY);
+                OperationResult preflightResult = GetBuildPreflightResult(state, nodeId, blueprintId);
+                if (!preflightResult.Success)
+                {
+                    return preflightResult;
+                }
+
+                OperationResult buildResult = buildService.Place(state, blueprintId, gridX, gridY);
+                if (!buildResult.Success)
+                {
+                    return GetBuildFailureResult(nodeId, buildResult);
+                }
+
+                return GetBuildSuccessResult(nodeId, buildResult);
             }
 
             return OperationResult.Fail("世界节点不存在或尚未接入。");
@@ -108,6 +126,87 @@ namespace StarryForest.World.Nodes
         private static bool IsClearableFlowerBedSlot(string nodeId)
         {
             return nodeId == "flower-bed-slot" || nodeId == "forest-flower-bed-slot";
+        }
+
+        private OperationResult GetBuildPreflightResult(PlayerState state, string nodeId, BlueprintId blueprintId)
+        {
+            if (!state.UnlockedBlueprints.Contains(blueprintId))
+            {
+                if (nodeId == "river-bridge")
+                {
+                    state.UnlockedBlueprints.Add(BlueprintId.Bridge);
+                    return OperationResult.Ok();
+                }
+
+                return OperationResult.Fail("图纸还没记录在木牌里。先打开木牌记录。");
+            }
+
+            if (inventoryService == null)
+            {
+                return OperationResult.Ok();
+            }
+
+            if (nodeId == "river-bridge" && inventoryService.GetCount(state, ItemId.Wood) < 1)
+            {
+                return OperationResult.Fail("修桥需要木材 1。先领取今日赠礼、出售物品买木材，或清理落枝。");
+            }
+
+            if (IsClearableFlowerBedSlot(nodeId) && inventoryService.GetCount(state, ItemId.FlowerSeed) < 2)
+            {
+                return OperationResult.Fail("花圃需要花种 2 和石子 1。先清理地块或在木牌购买花种。");
+            }
+
+            return OperationResult.Ok();
+        }
+
+        private OperationResult DiscoverBridgeRepairGuide(PlayerState state)
+        {
+            if (inventoryService == null)
+            {
+                return OperationResult.Fail("修桥引导未接入物品栏。");
+            }
+
+            state.KnownSystems.Add(BridgeRepairGuideId);
+            state.UnlockedBlueprints.Add(BlueprintId.Bridge);
+            int woodNeeded = 1 - inventoryService.GetCount(state, ItemId.Wood);
+            if (woodNeeded > 0)
+            {
+                OperationResult addResult = inventoryService.Add(state, ItemId.Wood, woodNeeded);
+                if (!addResult.Success)
+                {
+                    return addResult;
+                }
+            }
+
+            return OperationResult.Ok(woodNeeded > 0
+                ? "你发现了断桥。木屋旁的备用木板已放入背包，再点击断桥就能修复。"
+                : "你发现了断桥。背包里的木材足够修复，再点击断桥就能开始。");
+        }
+
+        private static OperationResult GetBuildFailureResult(string nodeId, OperationResult buildResult)
+        {
+            if (nodeId == "river-bridge" && buildResult.Message == "材料不足。")
+            {
+                return OperationResult.Fail("修桥材料不足：需要木材 1。");
+            }
+
+            if (IsClearableFlowerBedSlot(nodeId) && buildResult.Message == "材料不足。")
+            {
+                return OperationResult.Fail("花圃材料不足：需要花种 2 和石子 1。");
+            }
+
+            return buildResult;
+        }
+
+        private static OperationResult GetBuildSuccessResult(string nodeId, OperationResult buildResult)
+        {
+            return nodeId switch
+            {
+                "river-bridge" => OperationResult.Ok("木桥修好了。现在可以从桥面过河。"),
+                "flower-bed-slot" => OperationResult.Ok("花圃建好了。地块已经变成花园。"),
+                "forest-flower-bed-slot" => OperationResult.Ok("森林花圃建好了。这里多了一片花园。"),
+                _ => buildResult
+            };
         }
 
         private static bool TryGetBuildNode(string nodeId, out BlueprintId blueprintId, out int gridX, out int gridY)
