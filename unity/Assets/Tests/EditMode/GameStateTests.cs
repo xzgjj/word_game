@@ -2,6 +2,7 @@ using NUnit.Framework;
 using StarryForest.Core;
 using StarryForest.Inventory;
 using StarryForest.MiniGame;
+using StarryForest.Runtime;
 
 namespace StarryForest.Tests.EditMode
 {
@@ -35,6 +36,18 @@ namespace StarryForest.Tests.EditMode
             Assert.IsTrue(finishResult.Success, finishResult.Message);
             Assert.AreEqual(1, gameState.Player.StickerWallCount);
             Assert.AreEqual(3, gameState.Inventory.GetCount(gameState.Player, ItemId.Sticker));
+        }
+
+        [Test]
+        public void ItemGuideMapsWorldNodesByItemType()
+        {
+            Assert.IsTrue(GameStateRunner.TryGetGuideItemForNode("forest-branch", out ItemId wood));
+            Assert.IsTrue(GameStateRunner.TryGetGuideItemForNode("home-fallen-branch", out ItemId homeWood));
+            Assert.IsTrue(GameStateRunner.TryGetGuideItemForNode("river-shell", out ItemId shell));
+            Assert.IsFalse(GameStateRunner.TryGetGuideItemForNode("home-signboard", out _));
+            Assert.AreEqual(ItemId.Wood, wood);
+            Assert.AreEqual(ItemId.Wood, homeWood);
+            Assert.AreEqual(ItemId.RiverShell, shell);
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using StarryForest.Core;
+using StarryForest.Inventory;
 using StarryForest.MiniGame;
 using StarryForest.Player;
 using StarryForest.Save;
@@ -26,6 +27,7 @@ namespace StarryForest.Runtime
         private const float MiniGameMoveSpeed = 4.6f;
         private const float AutoArchiveIntervalSeconds = 600f;
         private const float InteractionFeedbackDurationSeconds = 2.2f;
+        private const string ItemGuideSystemPrefix = "item-guide-";
         private static readonly ItemId[] EquipmentRingItems =
         {
             ItemId.Axe,
@@ -48,7 +50,6 @@ namespace StarryForest.Runtime
         private AudioClip successClip;
         private AudioClip failClip;
         private AudioClip menuClip;
-        private bool firstResourceGuideCompleted;
         private bool feedbackAudioEnabled = true;
         private float autoArchiveTimer;
         private float interactionFeedbackTimer;
@@ -90,6 +91,7 @@ namespace StarryForest.Runtime
             instance = this;
             DontDestroyOnLoad(gameObject);
             GameState = new GameState();
+            MarkKnownItemGuidesFromInventory();
             HudView hudView = GetComponent<HudView>() ?? gameObject.AddComponent<HudView>();
             hudView.Configure(this);
             ConfigureAudioFeedback();
@@ -169,6 +171,7 @@ namespace StarryForest.Runtime
             else
             {
                 EnsureMiniGameStateForDirectPlay();
+                MarkKnownItemGuidesFromInventory();
                 buildPlacementViews = new BuildPlacementView[0];
                 clearingPlotViews = new ClearingPlotView[0];
                 stickerWallView = null;
@@ -240,9 +243,10 @@ namespace StarryForest.Runtime
 
             if (CurrentNode != null)
             {
-                if (!firstResourceGuideCompleted && IsResourceNode(CurrentNode.NodeId))
+                if (TryGetGuideItemForNode(CurrentNode.NodeId, out ItemId guideItem)
+                    && ShouldShowFirstItemGuide(guideItem))
                 {
-                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：按 E 或鼠标左键收进背包。之后同类资源不再弹新手说明";
+                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：第一次发现{GetItemDisplayName(guideItem)}，按 E 或鼠标左键收进背包。之后同类物品只保留短提示";
                     return;
                 }
 
@@ -381,11 +385,6 @@ namespace StarryForest.Runtime
 
             ShowInteractionProgressPanel(CurrentNode.DisplayLabel, GetInteractionStartMessage(CurrentNode.NodeId));
             OperationResult result = CurrentNode.Interact(GameState);
-            if (result.Success && IsResourceNode(CurrentNode.NodeId))
-            {
-                firstResourceGuideCompleted = true;
-            }
-
             SetResultAndAutosave(result, false);
             ShowInteractionFeedbackForResult(CurrentNode, result);
             RefreshWorldViews();
@@ -461,14 +460,15 @@ namespace StarryForest.Runtime
                 keyboard.digit9Key
             };
 
-            for (int index = 0; index < equipKeys.Length && index < EquipmentRingItems.Length; index++)
+            IReadOnlyList<ItemId> equipmentItems = GetVisibleEquipmentItems();
+            for (int index = 0; index < equipKeys.Length && index < equipmentItems.Count; index++)
             {
                 if (!WasPressed(equipKeys[index]))
                 {
                     continue;
                 }
 
-                EquipFromInventory(EquipmentRingItems[index]);
+                EquipFromInventory(equipmentItems[index]);
                 return;
             }
         }
@@ -814,6 +814,7 @@ namespace StarryForest.Runtime
             GameState.ReplacePlayer(loadResult.State);
             ShowSystemMenu = false;
             autoArchiveTimer = 0f;
+            MarkKnownItemGuidesFromInventory();
             SetResult(OperationResult.Ok(loadResult.Message));
             RefreshWorldViews();
             UpdateNearestNode();
@@ -839,6 +840,11 @@ namespace StarryForest.Runtime
             if (playAudio)
             {
                 PlayFeedback(result.Success ? successClip : failClip);
+            }
+
+            if (result.Success)
+            {
+                MarkKnownItemGuidesFromInventory();
             }
         }
 
@@ -1031,6 +1037,25 @@ namespace StarryForest.Runtime
             return System.Array.IndexOf(EquipmentRingItems, itemId) >= 0;
         }
 
+        public IReadOnlyList<ItemId> GetVisibleEquipmentItems()
+        {
+            List<ItemId> visibleItems = new List<ItemId>();
+            if (State == null || GameState == null)
+            {
+                return visibleItems;
+            }
+
+            foreach (ItemId itemId in EquipmentRingItems)
+            {
+                if (GameState.Inventory.GetCount(State, itemId) > 0)
+                {
+                    visibleItems.Add(itemId);
+                }
+            }
+
+            return visibleItems;
+        }
+
         public bool IsEquipped(ItemId itemId)
         {
             return State != null && State.EquippedItemId == itemId.ToString();
@@ -1070,6 +1095,77 @@ namespace StarryForest.Runtime
                 ItemId.Axe => "斧头",
                 _ => itemId.ToString()
             };
+        }
+
+        private bool ShouldShowFirstItemGuide(ItemId itemId)
+        {
+            if (State == null || GameState == null)
+            {
+                return false;
+            }
+
+            if (State.KnownSystems.Contains(GetItemGuideSystemId(itemId)))
+            {
+                return false;
+            }
+
+            if (GameState.Inventory.GetCount(State, itemId) > 0)
+            {
+                State.KnownSystems.Add(GetItemGuideSystemId(itemId));
+                return false;
+            }
+
+            return true;
+        }
+
+        private void MarkKnownItemGuidesFromInventory()
+        {
+            if (State == null || GameState == null)
+            {
+                return;
+            }
+
+            foreach (ItemId itemId in ItemCatalog.Items)
+            {
+                if (GameState.Inventory.GetCount(State, itemId) > 0)
+                {
+                    State.KnownSystems.Add(GetItemGuideSystemId(itemId));
+                }
+            }
+        }
+
+        public static bool TryGetGuideItemForNode(string nodeId, out ItemId itemId)
+        {
+            switch (nodeId)
+            {
+                case "forest-branch":
+                case "home-fallen-branch":
+                    itemId = ItemId.Wood;
+                    return true;
+                case "forest-flower-seed":
+                case "home-grass-flower-seed":
+                    itemId = ItemId.FlowerSeed;
+                    return true;
+                case "river-stone":
+                    itemId = ItemId.Stone;
+                    return true;
+                case "river-shell":
+                case "shallow-river-shell":
+                    itemId = ItemId.RiverShell;
+                    return true;
+                case "river-fish":
+                case "shallow-fish":
+                    itemId = ItemId.Fish;
+                    return true;
+                default:
+                    itemId = default;
+                    return false;
+            }
+        }
+
+        private static string GetItemGuideSystemId(ItemId itemId)
+        {
+            return $"{ItemGuideSystemPrefix}{itemId}";
         }
 
         private static Vector2 ReadPlanarInput(Keyboard keyboard, bool includeArrowKeys = true)

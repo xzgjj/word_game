@@ -195,12 +195,16 @@ namespace StarryForest.Runtime
             GUILayout.Label("装备圆环", titleStyle);
             GUILayout.Label("Tab 关闭，数字键选择，Backspace 收起装备。物品来自背包装备/室内分类。", hintStyle);
             GUILayout.Space(10);
-            IReadOnlyList<ItemId> equipmentItems = runner.EquipmentItems;
+            IReadOnlyList<ItemId> equipmentItems = runner.GetVisibleEquipmentItems();
+            if (equipmentItems.Count == 0)
+            {
+                GUILayout.Label("还没有获得可装备物品。先在木牌购买斧头，或继续探索获得新物品。", bodyStyle);
+            }
+
             for (int index = 0; index < equipmentItems.Count; index++)
             {
                 ItemId itemId = equipmentItems[index];
-                bool ownsItem = runner.GameState.Inventory.GetCount(runner.State, itemId) > 0;
-                string status = runner.IsEquipped(itemId) ? "已装备" : ownsItem ? "可装备" : "未获得";
+                string status = runner.IsEquipped(itemId) ? "已装备" : "可装备";
                 GUILayout.Label($"{index + 1}. {GetItemName(itemId)}  {status}", bodyStyle);
             }
 
