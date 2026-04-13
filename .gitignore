@@ -76,6 +76,7 @@ screenshot-*.jpeg
 screenshot-*.webp
 
 # Local configuration and documentation files (不上传的本地文档)
+经验总结.md
 CLAUDE.md
 notes.txt
 implementation_plan.md
