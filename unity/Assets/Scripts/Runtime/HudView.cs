@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using StarryForest.Core;
+using StarryForest.Inventory;
 using StarryForest.Signboard;
 using UnityEngine;
 
@@ -7,11 +8,29 @@ namespace StarryForest.Runtime
 {
     public sealed class HudView : MonoBehaviour
     {
+        private static readonly string[] InventoryCategoryNames =
+        {
+            "采集",
+            "交换/货币",
+            "建造种植",
+            "室内/特殊"
+        };
+
+        private static readonly ItemId[][] InventoryCategoryItems =
+        {
+            new[] { ItemId.Wood, ItemId.Stone, ItemId.RiverShell, ItemId.Fish },
+            new[] { ItemId.EmotionShard, ItemId.StarCore, ItemId.Sticker },
+            new[] { ItemId.FlowerSeed, ItemId.Wood, ItemId.Stone },
+            new[] { ItemId.OldCartridge, ItemId.Sticker }
+        };
+
         [SerializeField] private GameStateRunner runner;
         private GUIStyle panelStyle;
         private GUIStyle titleStyle;
         private GUIStyle bodyStyle;
         private GUIStyle hintStyle;
+
+        public static int InventoryCategoryCount => InventoryCategoryNames.Length;
 
         public void Configure(GameStateRunner newRunner)
         {
@@ -65,9 +84,11 @@ namespace StarryForest.Runtime
             GUILayout.Label("星绪森林 视觉可玩版", titleStyle);
             GUILayout.Label(runner.IsMiniGameScene
                 ? "WASD 移动，E 收集贴纸或从出口回家。"
-                : "WASD 移动，E 互动，I 打开/隐藏背包，T 切换时间。靠近木牌后按 1-4 兑换。", bodyStyle);
-            string prompt = string.IsNullOrEmpty(runner.CurrentPrompt) ? "在木屋、森林、河岸、桥和游戏机之间自由探索。" : runner.CurrentPrompt;
-            GUILayout.Label(prompt, hintStyle);
+                : "WASD 移动，E 互动，I 打开/隐藏背包，T 切换时间。靠近木牌后按 1-5 兑换。", bodyStyle);
+            if (!string.IsNullOrEmpty(runner.CurrentPrompt))
+            {
+                GUILayout.Label(runner.CurrentPrompt, hintStyle);
+            }
             if (!string.IsNullOrEmpty(runner.LastMessage))
             {
                 GUILayout.Label(runner.LastMessage, bodyStyle);
@@ -90,13 +111,23 @@ namespace StarryForest.Runtime
             Rect rect = new Rect(Screen.width - 316, 108, 300, 220);
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 12, rect.y + 10, rect.width - 24, rect.height - 20));
-            GUILayout.Label("12 格背包", titleStyle);
-            foreach (ItemId itemId in System.Enum.GetValues(typeof(ItemId)))
+            int categoryIndex = Mathf.Clamp(runner.InventoryCategoryIndex, 0, InventoryCategoryNames.Length - 1);
+            GUILayout.Label($"12 格背包  {InventoryCategoryNames[categoryIndex]}", titleStyle);
+            GUILayout.Label("← / → 切换分类", hintStyle);
+            List<ItemId> visibleItems = GetVisibleInventoryItems(runner.State, categoryIndex);
+            if (visibleItems.Count == 0)
+            {
+                GUILayout.Label("这一栏还没有发现物品。", bodyStyle);
+            }
+
+            foreach (ItemId itemId in visibleItems)
             {
                 runner.State.Items.TryGetValue(itemId, out int count);
                 GUILayout.Label($"{GetItemName(itemId)}  {count}", bodyStyle);
             }
-            GUILayout.Label("空余记录格  3", hintStyle);
+            int discoveredCount = GetVisibleInventoryItems(runner.State).Count;
+            int hiddenCount = ItemCatalog.Items.Count - discoveredCount;
+            GUILayout.Label($"已发现 {discoveredCount}/{ItemCatalog.Items.Count} 类  隐藏 {hiddenCount} 类  预留记录格 3", hintStyle);
             GUILayout.EndArea();
         }
 
@@ -107,12 +138,13 @@ namespace StarryForest.Runtime
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 12, rect.y + 10, rect.width - 24, rect.height - 20));
             GUILayout.Label("木屋前木牌", titleStyle);
-            GUILayout.Label("今日可换  按 1-4 兑换，Esc 关闭", hintStyle);
+            GUILayout.Label("今日可换  按 1-5 兑换，Esc 关闭", hintStyle);
 
             int shortcut = 1;
             foreach (ExchangeRecipeAvailability availability in snapshot.ExchangeRecipes)
             {
-                GUILayout.Label($"{shortcut}. {GetItemName(availability.Recipe.OutputItemId)} x{availability.Recipe.OutputCount}  需要 {FormatCost(availability.Recipe.Cost)}  {(availability.CanExchange ? "可换" : "材料不足")}", bodyStyle);
+                string unavailableReason = availability.Recipe.IsDailyReward ? "今日已领" : "材料不足";
+                GUILayout.Label($"{shortcut}. {GetItemName(availability.Recipe.OutputItemId)} x{availability.Recipe.OutputCount}  需要 {FormatCost(availability.Recipe.Cost)}  {(availability.CanExchange ? "可换" : unavailableReason)}", bodyStyle);
                 shortcut += 1;
             }
 
@@ -179,6 +211,11 @@ namespace StarryForest.Runtime
 
         private static string FormatCost(IReadOnlyDictionary<ItemId, int> cost)
         {
+            if (cost.Count == 0)
+            {
+                return "今日赠礼";
+            }
+
             List<string> parts = new List<string>();
             foreach (KeyValuePair<ItemId, int> entry in cost)
             {
@@ -186,6 +223,37 @@ namespace StarryForest.Runtime
             }
 
             return string.Join(" / ", parts);
+        }
+
+        private static List<ItemId> GetVisibleInventoryItems(PlayerState state, int categoryIndex = -1)
+        {
+            List<ItemId> visibleItems = new List<ItemId>
+            {
+                ItemId.Wood,
+                ItemId.Stone,
+                ItemId.FlowerSeed
+            };
+
+            IReadOnlyList<ItemId> sourceItems = categoryIndex >= 0 ? InventoryCategoryItems[categoryIndex] : ItemCatalog.Items;
+            foreach (ItemId itemId in sourceItems)
+            {
+                if (visibleItems.Contains(itemId))
+                {
+                    continue;
+                }
+
+                if (state.Items.TryGetValue(itemId, out int count) && count > 0)
+                {
+                    visibleItems.Add(itemId);
+                }
+            }
+
+            if (categoryIndex >= 0)
+            {
+                visibleItems.RemoveAll(itemId => System.Array.IndexOf(InventoryCategoryItems[categoryIndex], itemId) < 0);
+            }
+
+            return visibleItems;
         }
 
         private static string GetItemName(ItemId itemId)

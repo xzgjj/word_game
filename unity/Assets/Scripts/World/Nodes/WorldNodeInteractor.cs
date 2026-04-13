@@ -13,18 +13,27 @@ namespace StarryForest.World.Nodes
         public string NodeId => nodeId;
         public string DisplayLabel => displayLabel;
         public string Prompt => prompt;
-        public float InteractionRadius => interactionRadius;
+        public float InteractionRadius => GetEffectiveInteractionRadius();
 
-        public void Configure(string newNodeId, string newDisplayLabel, string newPrompt)
+        private void Awake()
+        {
+            if (nodeId == "river-bridge" && interactionRadius < 2.6f)
+            {
+                interactionRadius = 2.6f;
+            }
+        }
+
+        public void Configure(string newNodeId, string newDisplayLabel, string newPrompt, float newInteractionRadius = 1.5f)
         {
             nodeId = newNodeId;
             displayLabel = newDisplayLabel;
             prompt = newPrompt;
+            interactionRadius = newInteractionRadius;
         }
 
         public bool IsInRange(Vector3 playerPosition)
         {
-            return Vector3.Distance(transform.position, playerPosition) <= interactionRadius;
+            return Vector3.Distance(transform.position, playerPosition) <= InteractionRadius;
         }
 
         public string GetPrompt(Vector3 playerPosition)
@@ -45,6 +54,11 @@ namespace StarryForest.World.Nodes
             }
 
             return gameState.InteractWithWorldNode(nodeId);
+        }
+
+        private float GetEffectiveInteractionRadius()
+        {
+            return nodeId == "river-bridge" && interactionRadius < 2.6f ? 2.6f : interactionRadius;
         }
     }
 }

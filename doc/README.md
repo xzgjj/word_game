@@ -13,5 +13,7 @@
 - `unity_visual_playable_guide.md`
 - `visual_playable_art_direction.md`
 - `visual_benchmark_review_stage8.md`
+- `interaction-design-framework.md`
+- `interaction-fallback-spec.md`
 
 需要把某份详细文档上传 git 时，先和用户确认。

@@ -23,6 +23,15 @@ namespace StarryForest.Signboard
             exchangeRecipes = new Dictionary<string, ExchangeRecipe>
             {
                 {
+                    "daily-wood-gift",
+                    new ExchangeRecipe(
+                        "daily-wood-gift",
+                        ItemId.Wood,
+                        1,
+                        new Dictionary<ItemId, int>(),
+                        true)
+                },
+                {
                     "exchange-emotion-shard",
                     new ExchangeRecipe(
                         "exchange-emotion-shard",
@@ -88,6 +97,7 @@ namespace StarryForest.Signboard
         public bool CanExchange(PlayerState state, string recipeId)
         {
             return exchangeRecipes.TryGetValue(recipeId, out ExchangeRecipe recipe)
+                && (!recipe.IsDailyReward || !state.SignboardDailyRewardClaimed)
                 && inventoryService.CanAfford(state, recipe.Cost);
         }
 
@@ -96,7 +106,7 @@ namespace StarryForest.Signboard
             List<ExchangeRecipeAvailability> recipes = new List<ExchangeRecipeAvailability>();
             foreach (ExchangeRecipe recipe in exchangeRecipes.Values)
             {
-                recipes.Add(new ExchangeRecipeAvailability(recipe, inventoryService.CanAfford(state, recipe.Cost)));
+                recipes.Add(new ExchangeRecipeAvailability(recipe, CanExchange(state, recipe.Id)));
             }
 
             return new SignboardMenuSnapshot(
@@ -111,6 +121,22 @@ namespace StarryForest.Signboard
             if (!exchangeRecipes.TryGetValue(recipeId, out ExchangeRecipe recipe))
             {
                 return OperationResult.Fail("兑换配方不存在。");
+            }
+
+            if (recipe.IsDailyReward)
+            {
+                if (state.SignboardDailyRewardClaimed)
+                {
+                    return OperationResult.Fail("今日赠礼已经领取。");
+                }
+
+                OperationResult addRewardResult = inventoryService.Add(state, recipe.OutputItemId, recipe.OutputCount);
+                if (addRewardResult.Success)
+                {
+                    state.SignboardDailyRewardClaimed = true;
+                }
+
+                return addRewardResult.Success ? OperationResult.Ok("今日赠礼已放入背包。") : addRewardResult;
             }
 
             OperationResult spendResult = inventoryService.Spend(state, recipe.Cost);

@@ -26,6 +26,11 @@ namespace StarryForest.Runtime
         private PlayerController playerController;
         private Transform miniGamePlayer;
         private Transform exitDoor;
+        private AudioSource audioSource;
+        private AudioClip successClip;
+        private AudioClip failClip;
+        private AudioClip menuClip;
+        private bool firstResourceGuideCompleted;
 
         public GameState GameState { get; private set; }
         public PlayerState State => GameState?.Player;
@@ -35,6 +40,7 @@ namespace StarryForest.Runtime
         public bool ShowSignboard { get; private set; }
         public bool ShowArcadeMenu { get; private set; }
         public bool ShowInventory { get; private set; }
+        public int InventoryCategoryIndex { get; private set; }
         public bool IsMiniGameScene => SceneManager.GetActiveScene().name == "MiniGame01";
         public bool CanStartMiniGame => State != null
             && State.KnownSystems.Contains(GameConstants.ArcadeSystemId)
@@ -53,6 +59,7 @@ namespace StarryForest.Runtime
             GameState = new GameState();
             HudView hudView = GetComponent<HudView>() ?? gameObject.AddComponent<HudView>();
             hudView.Configure(this);
+            ConfigureAudioFeedback();
             SceneManager.sceneLoaded += HandleSceneLoaded;
         }
 
@@ -60,7 +67,6 @@ namespace StarryForest.Runtime
         {
             ResolveSceneObjects();
             RefreshWorldViews();
-            SetMessage("从木屋出发。先靠近木牌打开图纸，再去森林和河岸收材料。");
         }
 
         private void OnDestroy()
@@ -160,7 +166,7 @@ namespace StarryForest.Runtime
                 return;
             }
 
-            Vector2 input = ReadPlanarInput(keyboard);
+            Vector2 input = ReadPlanarInput(keyboard, !ShowInventory);
             playerController.Move(input, Time.deltaTime);
         }
 
@@ -192,6 +198,12 @@ namespace StarryForest.Runtime
 
             if (CurrentNode != null)
             {
+                if (!firstResourceGuideCompleted && IsResourceNode(CurrentNode.NodeId))
+                {
+                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：按 E 收进背包。之后同类资源不再弹新手说明";
+                    return;
+                }
+
                 CurrentPrompt = $"{CurrentNode.DisplayLabel}：{GetPromptForNode(CurrentNode)}，按 E";
             }
         }
@@ -223,6 +235,19 @@ namespace StarryForest.Runtime
             if (WasPressed(keyboard.iKey))
             {
                 ShowInventory = !ShowInventory;
+                PlayFeedback(menuClip);
+            }
+
+            if (ShowInventory && WasPressed(keyboard.leftArrowKey))
+            {
+                MoveInventoryCategory(-1);
+                return;
+            }
+
+            if (ShowInventory && WasPressed(keyboard.rightArrowKey))
+            {
+                MoveInventoryCategory(1);
+                return;
             }
 
             if (ShowSignboard)
@@ -252,21 +277,28 @@ namespace StarryForest.Runtime
             if (CurrentNode.NodeId == "home-signboard")
             {
                 ShowSignboard = true;
+                PlayFeedback(menuClip);
             }
 
             if (CurrentNode.NodeId == "clearing-arcade")
             {
                 ShowArcadeMenu = true;
+                PlayFeedback(menuClip);
             }
 
             OperationResult result = CurrentNode.Interact(GameState);
+            if (result.Success && IsResourceNode(CurrentNode.NodeId))
+            {
+                firstResourceGuideCompleted = true;
+            }
+
             SetResult(result);
             RefreshWorldViews();
         }
 
         private void TryExchangeByShortcut(Keyboard keyboard)
         {
-            KeyControl[] keys = { keyboard.digit1Key, keyboard.digit2Key, keyboard.digit3Key, keyboard.digit4Key };
+            KeyControl[] keys = { keyboard.digit1Key, keyboard.digit2Key, keyboard.digit3Key, keyboard.digit4Key, keyboard.digit5Key };
             List<ExchangeRecipeAvailability> recipes = GameState.Signboard.GetMenuSnapshot(State).ExchangeRecipes.ToList();
             for (int index = 0; index < keys.Length && index < recipes.Count; index++)
             {
@@ -366,6 +398,7 @@ namespace StarryForest.Runtime
         private void SetResult(OperationResult result)
         {
             SetMessage(result.Message);
+            PlayFeedback(result.Success ? successClip : failClip);
         }
 
         private void SetMessage(string message)
@@ -373,25 +406,79 @@ namespace StarryForest.Runtime
             LastMessage = message;
         }
 
-        private static Vector2 ReadPlanarInput(Keyboard keyboard)
+        private void MoveInventoryCategory(int direction)
+        {
+            InventoryCategoryIndex = (InventoryCategoryIndex + direction + HudView.InventoryCategoryCount) % HudView.InventoryCategoryCount;
+            PlayFeedback(menuClip);
+        }
+
+        private void ConfigureAudioFeedback()
+        {
+            audioSource = gameObject.AddComponent<AudioSource>();
+            audioSource.playOnAwake = false;
+            audioSource.volume = 0.18f;
+            successClip = CreateToneClip("Feedback_Success", 740f, 0.08f, 0.13f);
+            failClip = CreateToneClip("Feedback_Fail", 220f, 0.12f, 0.1f);
+            menuClip = CreateToneClip("Feedback_Menu", 520f, 0.06f, 0.09f);
+        }
+
+        private void PlayFeedback(AudioClip clip)
+        {
+            if (audioSource != null && clip != null)
+            {
+                audioSource.PlayOneShot(clip);
+            }
+        }
+
+        private static AudioClip CreateToneClip(string name, float frequency, float durationSeconds, float amplitude)
+        {
+            const int sampleRate = 44100;
+            int sampleCount = Mathf.Max(1, Mathf.RoundToInt(sampleRate * durationSeconds));
+            float[] samples = new float[sampleCount];
+            for (int index = 0; index < sampleCount; index++)
+            {
+                float t = index / (float)sampleRate;
+                float fade = 1f - (index / (float)sampleCount);
+                samples[index] = Mathf.Sin(2f * Mathf.PI * frequency * t) * amplitude * fade;
+            }
+
+            AudioClip clip = AudioClip.Create(name, sampleCount, 1, sampleRate, false);
+            clip.SetData(samples, 0);
+            return clip;
+        }
+
+        private static bool IsResourceNode(string nodeId)
+        {
+            return nodeId == "forest-branch"
+                || nodeId == "home-fallen-branch"
+                || nodeId == "forest-flower-seed"
+                || nodeId == "home-grass-flower-seed"
+                || nodeId == "river-stone"
+                || nodeId == "river-shell"
+                || nodeId == "shallow-river-shell"
+                || nodeId == "river-fish"
+                || nodeId == "shallow-fish";
+        }
+
+        private static Vector2 ReadPlanarInput(Keyboard keyboard, bool includeArrowKeys = true)
         {
             Vector2 input = Vector2.zero;
-            if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+            if (keyboard.aKey.isPressed || (includeArrowKeys && keyboard.leftArrowKey.isPressed))
             {
                 input.x -= 1f;
             }
 
-            if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+            if (keyboard.dKey.isPressed || (includeArrowKeys && keyboard.rightArrowKey.isPressed))
             {
                 input.x += 1f;
             }
 
-            if (keyboard.sKey.isPressed || keyboard.downArrowKey.isPressed)
+            if (keyboard.sKey.isPressed || (includeArrowKeys && keyboard.downArrowKey.isPressed))
             {
                 input.y -= 1f;
             }
 
-            if (keyboard.wKey.isPressed || keyboard.upArrowKey.isPressed)
+            if (keyboard.wKey.isPressed || (includeArrowKeys && keyboard.upArrowKey.isPressed))
             {
                 input.y += 1f;
             }

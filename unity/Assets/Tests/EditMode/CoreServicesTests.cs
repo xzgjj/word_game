@@ -44,6 +44,22 @@ namespace StarryForest.Tests.EditMode
         }
 
         [Test]
+        public void SignboardDailyRewardAddsStarterMaterialOnce()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            SignboardService signboard = new SignboardService(inventory);
+
+            OperationResult first = signboard.Exchange(state, "daily-wood-gift");
+            OperationResult second = signboard.Exchange(state, "daily-wood-gift");
+
+            Assert.IsTrue(first.Success, first.Message);
+            Assert.IsFalse(second.Success);
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Wood));
+            Assert.IsTrue(state.SignboardDailyRewardClaimed);
+        }
+
+        [Test]
         public void SignboardOpenDiscoversSystemAndGrantsInitialBlueprints()
         {
             PlayerState state = NewState();
@@ -71,6 +87,9 @@ namespace StarryForest.Tests.EditMode
             inventory.Add(state, ItemId.FlowerSeed, 1);
 
             Assert.IsTrue(signboard.CanExchange(state, "exchange-emotion-shard"));
+            Assert.IsTrue(signboard.CanExchange(state, "daily-wood-gift"));
+            signboard.Exchange(state, "daily-wood-gift");
+            Assert.IsFalse(signboard.CanExchange(state, "daily-wood-gift"));
         }
 
         [Test]

@@ -68,11 +68,18 @@ namespace StarryForest.Player
 
         private static bool IsInsideRiver(Vector3 position)
         {
-            return position.x > -0.58f && position.x < 2.12f && position.z > -5.05f && position.z < 4.25f;
+            return IsInsideRect(position, -0.95f, 2.24f, -5.75f, -2.65f)
+                || IsInsideRect(position, -0.5f, 2.38f, -2.7f, 0.8f)
+                || IsInsideRect(position, -1.2f, 2.1f, 0.7f, 4.6f);
         }
 
         private static bool CrossesBlockedRiver(Vector3 from, Vector3 to, bool allowBridgeCrossing)
         {
+            if (IsOnBridge(to, allowBridgeCrossing))
+            {
+                return false;
+            }
+
             bool crossesRiverBand = (from.x <= -0.58f && to.x >= 2.12f)
                 || (from.x >= 2.12f && to.x <= -0.58f)
                 || IsInsideRiver(to);
@@ -88,10 +95,10 @@ namespace StarryForest.Player
         private static bool IsOnBridge(Vector3 position, bool allowBridgeCrossing)
         {
             return allowBridgeCrossing
-                && position.x >= -0.75f
-                && position.x <= 2.35f
-                && position.z >= -4.1f
-                && position.z <= -2.25f;
+                && position.x >= -1.05f
+                && position.x <= 2.45f
+                && position.z >= -3.75f
+                && position.z <= -2.55f;
         }
 
         private static bool IsInsideRect(Vector3 position, float minX, float maxX, float minZ, float maxZ)
@@ -107,10 +114,28 @@ namespace StarryForest.Player
             }
 
             Vector3 projected = position;
-            float distanceToLeftBank = Mathf.Abs(position.x - -0.58f);
-            float distanceToRightBank = Mathf.Abs(position.x - 2.12f);
-            projected.x = distanceToLeftBank <= distanceToRightBank ? -0.58f : 2.12f;
+            if (TryProjectOutOfRect(position, -0.95f, 2.24f, -5.75f, -2.65f, out projected)
+                || TryProjectOutOfRect(position, -0.5f, 2.38f, -2.7f, 0.8f, out projected)
+                || TryProjectOutOfRect(position, -1.2f, 2.1f, 0.7f, 4.6f, out projected))
+            {
+                return projected;
+            }
+
             return projected;
+        }
+
+        private static bool TryProjectOutOfRect(Vector3 position, float minX, float maxX, float minZ, float maxZ, out Vector3 projected)
+        {
+            projected = position;
+            if (!IsInsideRect(position, minX, maxX, minZ, maxZ))
+            {
+                return false;
+            }
+
+            float distanceToLeft = Mathf.Abs(position.x - minX);
+            float distanceToRight = Mathf.Abs(position.x - maxX);
+            projected.x = distanceToLeft <= distanceToRight ? minX : maxX;
+            return true;
         }
     }
 }

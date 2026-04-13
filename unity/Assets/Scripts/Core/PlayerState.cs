@@ -35,5 +35,6 @@ namespace StarryForest.Core
         public bool CustomBuildUnlocked { get; set; }
         public HashSet<string> CompletedMiniGames { get; }
         public int StickerWallCount { get; set; }
+        public bool SignboardDailyRewardClaimed { get; set; }
     }
 }

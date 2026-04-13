@@ -44,6 +44,8 @@ namespace StarryForest.Tests.EditMode
             AssertNode("ArcadeMachine", "clearing-arcade");
             AssertNode("ArcadeBaseSlot", "arcade-base-slot");
             Assert.IsNotNull(GameObject.Find("Player").GetComponent<PlayerController>());
+            WorldNodeInteractor bridge = GameObject.Find("DamagedBridge").GetComponent<WorldNodeInteractor>();
+            Assert.GreaterOrEqual(bridge.InteractionRadius, 2.4f);
         }
 
         [Test]

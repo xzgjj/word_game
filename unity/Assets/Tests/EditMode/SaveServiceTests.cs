@@ -25,6 +25,7 @@ namespace StarryForest.Tests.EditMode
                 BuiltCount = 3,
                 CustomBuildUnlocked = true,
                 StickerWallCount = 1,
+                SignboardDailyRewardClaimed = true,
                 ActiveMiniGameId = GameConstants.FirstMiniGameId,
                 ActiveMiniGameStickerCount = 2
             };
@@ -58,6 +59,7 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(CustomBuildingTheme.Star, loadResult.State.PlacedBuildings[0].CustomData.Theme);
             Assert.IsTrue(loadResult.State.KnownSystems.Contains(GameConstants.ArcadeSystemId));
             Assert.IsTrue(loadResult.State.CompletedMiniGames.Contains(GameConstants.FirstMiniGameId));
+            Assert.IsTrue(loadResult.State.SignboardDailyRewardClaimed);
 
             File.Delete(filePath);
         }

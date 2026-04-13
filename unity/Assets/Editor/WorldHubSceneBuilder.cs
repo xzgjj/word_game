@@ -168,7 +168,7 @@ namespace StarryForest.EditorTools
 
         private static void CreateBridgeAndBuildSlots(Transform root)
         {
-            GameObject bridge = CreateNode("DamagedBridge", "river-bridge", "半损坏木桥", "修一下木桥", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.22f, 0.8f), new Color(0.52f, 0.34f, 0.19f));
+            GameObject bridge = CreateNode("DamagedBridge", "river-bridge", "半损坏木桥", "修一下木桥", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.22f, 0.8f), new Color(0.52f, 0.34f, 0.19f), 2.6f);
             GameObject repairedBridge = CreateCube("RepairedBridge", new Vector3(0f, 0.08f, 0f), new Vector3(2.8f, 0.25f, 1.0f), new Color(0.72f, 0.47f, 0.26f), bridge.transform);
             bridge.AddComponent<BuildPlacementView>().Configure("river-bridge", BlueprintId.Bridge, 8, 2, repairedBridge);
             bridge.transform.SetParent(root);
@@ -285,10 +285,10 @@ namespace StarryForest.EditorTools
             CreateCube(name, position, waterScale, new Color(0.2f, 0.56f, 0.68f), root, true);
         }
 
-        private static GameObject CreateNode(string name, string nodeId, string label, string prompt, Vector3 position, Vector3 scale, Color color)
+        private static GameObject CreateNode(string name, string nodeId, string label, string prompt, Vector3 position, Vector3 scale, Color color, float interactionRadius = 1.5f)
         {
             GameObject node = CreateCube(name, position, scale, color);
-            node.AddComponent<WorldNodeInteractor>().Configure(nodeId, label, prompt);
+            node.AddComponent<WorldNodeInteractor>().Configure(nodeId, label, prompt, interactionRadius);
             return node;
         }
 

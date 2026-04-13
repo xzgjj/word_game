@@ -64,12 +64,13 @@ namespace StarryForest.Save
         public bool customBuildUnlocked;
         public List<string> completedMiniGames = new List<string>();
         public int stickerWallCount;
+        public bool signboardDailyRewardClaimed;
 
         public static PlayerSaveData FromState(PlayerState state)
         {
             PlayerSaveData data = new PlayerSaveData
             {
-                schemaVersion = 3,
+                schemaVersion = 4,
                 positionId = state.PositionId,
                 emotion = state.Emotion.ToString(),
                 timeOfDay = state.TimeOfDay.ToString(),
@@ -78,7 +79,8 @@ namespace StarryForest.Save
                 activeMiniGameStickerCount = state.ActiveMiniGameStickerCount,
                 builtCount = state.BuiltCount,
                 customBuildUnlocked = state.CustomBuildUnlocked,
-                stickerWallCount = state.StickerWallCount
+                stickerWallCount = state.StickerWallCount,
+                signboardDailyRewardClaimed = state.SignboardDailyRewardClaimed
             };
 
             foreach (KeyValuePair<ItemId, int> item in state.Items)
@@ -119,7 +121,8 @@ namespace StarryForest.Save
                 ActiveMiniGameStickerCount = activeMiniGameStickerCount,
                 BuiltCount = builtCount,
                 CustomBuildUnlocked = customBuildUnlocked,
-                StickerWallCount = stickerWallCount
+                StickerWallCount = stickerWallCount,
+                SignboardDailyRewardClaimed = signboardDailyRewardClaimed
             };
 
             foreach (ItemCountData item in items)
