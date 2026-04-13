@@ -46,7 +46,21 @@ namespace StarryForest.Tests.EditMode
 
             player.Move(new Vector2(1f, 0f), 1f);
 
-            Assert.AreEqual(-0.45f, gameObject.transform.position.x, 0.0001f);
+            Assert.AreEqual(-0.6f, gameObject.transform.position.x, 0.0001f);
+            Object.DestroyImmediate(gameObject);
+        }
+
+        [Test]
+        public void MoveProjectsPlayerOutOfRiverGap()
+        {
+            GameObject gameObject = new GameObject("player");
+            PlayerController player = gameObject.AddComponent<PlayerController>();
+            player.MoveSpeed = 4f;
+            gameObject.transform.position = new Vector3(0.7f, 0f, 1.3f);
+
+            player.Move(new Vector2(0f, 1f), 0.1f);
+
+            Assert.AreEqual(-0.58f, gameObject.transform.position.x, 0.0001f);
             Object.DestroyImmediate(gameObject);
         }
 
@@ -62,6 +76,34 @@ namespace StarryForest.Tests.EditMode
             player.Move(new Vector2(1f, 0f), 0.4f);
 
             Assert.Greater(gameObject.transform.position.x, -0.45f);
+            Object.DestroyImmediate(gameObject);
+        }
+
+        [Test]
+        public void MoveClampsRightIslandTopBoundary()
+        {
+            GameObject gameObject = new GameObject("player");
+            PlayerController player = gameObject.AddComponent<PlayerController>();
+            player.MoveSpeed = 4f;
+            gameObject.transform.position = new Vector3(6f, 0f, -0.8f);
+
+            player.Move(new Vector2(0f, 1f), 1f);
+
+            Assert.LessOrEqual(gameObject.transform.position.z, -0.7f);
+            Object.DestroyImmediate(gameObject);
+        }
+
+        [Test]
+        public void MoveRejectsTopAreaOutsideIsland()
+        {
+            GameObject gameObject = new GameObject("player");
+            PlayerController player = gameObject.AddComponent<PlayerController>();
+            player.MoveSpeed = 4f;
+            gameObject.transform.position = new Vector3(-2f, 0f, 3.8f);
+
+            player.Move(new Vector2(0f, 1f), 0.5f);
+
+            Assert.AreEqual(3.8f, gameObject.transform.position.z, 0.0001f);
             Object.DestroyImmediate(gameObject);
         }
     }
