@@ -51,3 +51,20 @@ MemoryCaptures/
 *.import
 *.mono/
 *.godot/
+
+# Local screenshots and reference images
+*.png
+tmp-*.png
+
+# Local configuration and documentation files
+CLAUDE.md
+notes.txt
+implementation_plan.md
+diff.md
+AGENT_EXECUTION_PROTOCOL.md
+PROJECT_ARCHITECTURE_UPDATE.md
+PROJECT_AUDIT_REPORT.md
+PROJECT_DIRECTOR_REVIEW_AND_OPTIMIZATION.md
+
+# Local development tools
+.claude/
