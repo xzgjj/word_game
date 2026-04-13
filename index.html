@@ -6,111 +6,141 @@
     <title>星绪森林</title>
     <link rel="stylesheet" href="style.css" />
 </head>
-<body>
+<body data-time="morning" data-mode="world">
     <div class="app-shell">
-        <header class="topbar" aria-label="游戏状态">
+        <header class="topbar" aria-label="小镇状态">
             <div>
-                <p class="eyebrow">现代情绪冒险 / 网页概念演示</p>
+                <p class="eyebrow">桌面原生玩法对齐 / 网页最终概念演示</p>
                 <h1>星绪森林</h1>
             </div>
-            <div class="status-panel" aria-live="polite">
+            <div class="status-strip" aria-live="polite">
                 <span id="locationLabel">木屋前</span>
-                <span id="objectiveLabel">发现：空地有一台发光游戏机</span>
-                <span id="inventoryLabel">木材 0 / 贴纸 0 / 碎片 0</span>
+                <span id="hintLabel">先看看木屋前木牌，图纸会被记录下来。</span>
+                <span id="recordLabel">建设 0/3 · 自建未开启</span>
             </div>
         </header>
 
         <main class="game-layout">
-            <section class="world-board" aria-label="主世界小地图">
-                <div class="skyline">
+            <section class="world-board" aria-label="WorldHub 单主地图">
+                <div class="distant-screen" aria-label="不可到达现代远景光幕">
                     <span></span>
                     <span></span>
                     <span></span>
                 </div>
-                <div class="river" aria-hidden="true"></div>
-                <div class="bridge" id="bridgeNode">木桥</div>
-                <button class="map-node cabin" data-action="home" type="button">
-                    <span class="node-icon">⌂</span>
-                    <span>木屋</span>
+                <div class="river-band" aria-hidden="true"></div>
+                <div class="home-cabin" aria-hidden="true">
+                    <div class="roof"></div>
+                    <div class="door"></div>
+                    <div class="sticker-wall" id="stickerWall">贴纸墙 0</div>
+                </div>
+                <button class="node signboard" type="button" data-action="open-signboard">
+                    <span>木牌</span>
+                    <small>今日可换 / 图纸 / 小镇记录</small>
                 </button>
-                <button class="map-node forest" data-action="forage" type="button">
-                    <span class="tree-row">♣ ♣ ♣</span>
+                <button class="node forest" type="button" data-action="gather-forest">
                     <span>旁友森林</span>
+                    <small>木材 · 花种</small>
                 </button>
-                <button class="map-node arcade" data-action="arcade" type="button">
-                    <span class="arcade-screen">PIX</span>
-                    <span>空地游戏机</span>
+                <button class="node riverbank" type="button" data-action="gather-riverbank">
+                    <span>河岸</span>
+                    <small>石子 · 河贝</small>
                 </button>
-                <div class="avatar-token" id="avatarToken">😄</div>
-                <div class="prompt-bubble" id="promptBubble">森林里有木材，河边有一座待修的木桥。</div>
+                <button class="node water" type="button" data-action="fish-river">
+                    <span>河水</span>
+                    <small>鱼</small>
+                </button>
+                <button class="node bridge-slot" type="button" data-build="Bridge">
+                    <span id="bridgeState">半损坏木桥</span>
+                    <small>木材 1</small>
+                </button>
+                <button class="node flower-slot build-slot" type="button" data-build="FlowerBed">
+                    <span>花圃空位</span>
+                    <small>花种 2 / 石子 1</small>
+                </button>
+                <button class="node sign-slot build-slot" type="button" data-build="ForestSign">
+                    <span>林间路牌空位</span>
+                    <small>木材 1 / 碎片 1</small>
+                </button>
+                <button class="node lamp-slot build-slot" type="button" data-build="RiverLamp">
+                    <span>河岸灯空位</span>
+                    <small>木材 1 / 星芯 1</small>
+                </button>
+                <button class="node arcade-base-slot build-slot" type="button" data-build="ArcadeBase">
+                    <span>游戏机底座空位</span>
+                    <small>石子 2 / 星芯 1</small>
+                </button>
+                <button class="node arcade" type="button" data-action="open-arcade">
+                    <span class="screen-text">PIX</span>
+                    <small>游戏机菜单</small>
+                </button>
+                <div class="avatar" id="avatarToken" aria-label="玩家">欢笑</div>
+                <p class="prompt" id="promptText">这是同一张主世界地图。材料来自森林、河岸和河水；木牌负责兑换、图纸和小镇记录。</p>
             </section>
 
-            <aside class="control-surface" aria-label="交互控制">
-                <section>
-                    <p class="panel-kicker">情绪能力</p>
-                    <div class="mode-buttons">
-                        <button class="mode-button active" type="button" data-mode="joy">欢笑 / 冲刺</button>
-                        <button class="mode-button" type="button" data-mode="calm">安静 / 漂浮</button>
-                        <button class="mode-button" type="button" data-mode="hype">激动 / 高跳</button>
+            <aside class="tool-panel" aria-label="生活工具">
+                <section class="town-tool">
+                    <div class="tool-heading">
+                        <p>物品栏</p>
+                        <span>9 类物品 + 3 空格 = 12 格</span>
                     </div>
-                    <p class="mode-desc" id="modeDesc">欢笑模式：短冲刺，适合越过一格缺口和快速拾取。</p>
+                    <div class="inventory-grid" id="inventoryGrid"></div>
                 </section>
 
-                <section>
-                    <p class="panel-kicker">小镇记录</p>
-                    <div class="step-list" id="stepList">
-                        <span class="done">木屋已安置</span>
-                        <span>发现森林资源</span>
-                        <span>木桥已修好</span>
-                        <span>游戏机已点亮</span>
-                        <span>贴纸墙新增</span>
+                <section class="town-tool">
+                    <div class="tool-heading">
+                        <p>木牌</p>
+                        <span id="signboardState">未查看</span>
                     </div>
+                    <div class="recipe-list" id="recipeList"></div>
+                    <div class="blueprint-row" id="blueprintRow"></div>
                 </section>
 
-                <section>
-                    <p class="panel-kicker">小镇时间</p>
-                    <div class="time-buttons">
-                        <button class="time-button active" type="button" data-time="morning">清晨</button>
-                        <button class="time-button" type="button" data-time="noon">午后</button>
-                        <button class="time-button" type="button" data-time="night">夜晚</button>
+                <section class="town-tool">
+                    <div class="tool-heading">
+                        <p>建设与自建</p>
+                        <span id="customState">建设 3 个物品后开启</span>
                     </div>
-                    <p class="mode-desc" id="timeDesc">清晨适合采集木材和整理木屋周围。</p>
+                    <div class="build-actions" id="buildActions"></div>
+                    <button class="wide-action" id="customBuildButton" type="button">试建 1x1 河贝小屋</button>
                 </section>
 
-                <section>
-                    <p class="panel-kicker">建设清单</p>
-                    <div class="build-list">
-                        <span>木桥：木材 1</span>
-                        <span>花圃：花种 2 / 石子 1</span>
-                        <span>木栅栏：木材 2</span>
-                        <span>工作台：木材 2 / 石子 1</span>
-                        <span>河岸灯：木材 1 / 星屑 1</span>
-                        <span>林间路牌：木材 1 / 碎片 1</span>
-                        <span>贴纸墙：贴纸 3</span>
+                <section class="town-tool">
+                    <div class="tool-heading">
+                        <p>时间</p>
+                        <span id="timeNote">清晨提示更清楚</span>
                     </div>
-                </section>
-
-                <section class="pixel-stage" id="pixelStage" aria-label="像素小游戏预览">
-                    <div class="pixel-hud">像素模式 <span id="stickerCounter">贴纸 0/3</span></div>
-                    <div class="pixel-hero" id="pixelHero">😄</div>
-                    <div class="pixel-platform p1"></div>
-                    <div class="pixel-platform p2"></div>
-                    <button class="sticker s1" type="button" data-sticker="1">贴纸</button>
-                    <button class="sticker s2" type="button" data-sticker="2">贴纸</button>
-                    <button class="sticker s3" type="button" data-sticker="3">贴纸</button>
-                    <button class="exit-door" id="exitDoor" type="button">出口</button>
+                    <div class="segmented" id="timeButtons">
+                        <button type="button" data-time="morning">清晨</button>
+                        <button type="button" data-time="noon">午后</button>
+                        <button type="button" data-time="night">夜晚</button>
+                    </div>
                 </section>
             </aside>
         </main>
 
-        <section class="design-notes" aria-label="对标验收">
+        <section class="pixel-console" id="pixelConsole" aria-label="游戏机像素小游戏">
+            <div class="pixel-info">
+                <p>游戏机菜单</p>
+                <span id="arcadeState">先发现游戏机并兑换旧卡带。</span>
+            </div>
+            <button class="wide-action" id="startMiniGame" type="button">进入像素小游戏</button>
+            <div class="pixel-stage" id="pixelStage">
+                <div class="pixel-player" id="pixelPlayer">欢笑</div>
+                <button class="pixel-sticker s1" type="button" data-sticker="1">贴纸</button>
+                <button class="pixel-sticker s2" type="button" data-sticker="2">贴纸</button>
+                <button class="pixel-sticker s3" type="button" data-sticker="3">贴纸</button>
+                <button class="exit-door" id="exitDoor" type="button">出口</button>
+            </div>
+        </section>
+
+        <section class="review-panel" aria-label="对标复核">
             <article>
-                <h2>主世界行为</h2>
-                <p>玩家自由查看木屋周围、森林、河岸和空地。收集来自场景需求，建设物会自然提示需要哪些材料。</p>
+                <h2>对标取法</h2>
+                <p>保留家园生活、材料因果、电子入口三件事；不复制参考画面，也不加入战斗、抽卡或限时任务。</p>
             </article>
             <article>
-                <h2>像素小游戏</h2>
-                <p>进入像素模式后收集 3 个贴纸，出口点亮后返回主世界。当前演示只保留核心机制，便于后续桌面版复用同一套元素。</p>
+                <h2>通过标准</h2>
+                <p>玩家能在非强制节奏中理解采集、兑换、建设、游戏机菜单和回家展示；网页只跟随 Unity 已跑通的核心系统。</p>
             </article>
         </section>
     </div>

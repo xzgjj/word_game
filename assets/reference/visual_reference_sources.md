@@ -4,6 +4,7 @@
 
 - Animal Crossing: New Horizons：https://animalcrossing.nintendo.com/new-horizons/create/
 - Minecraft：https://www.minecraft.net/en-us/about-minecraft
+- Honkai: Star Rail PlayStation page：https://www.playstation.com/en-us/games/honkai-star-rail/
 - Honkai: Star Rail 4.0：https://blog.playstation.com/2026/02/06/honkai-star-rail-version-4-0-no-aha-at-full-moon-will-go-live-on-february-13/
 - A Short Hike：https://ashorthike.com/
 
@@ -11,3 +12,4 @@
 
 - 只参考行为、布局和氛围方法，不复制角色、UI、截图和资产。
 - 生成或下载素材后，必须在 `assets/licenses/asset_sources.md` 记录。
+- 2026-04-13 网页最终对齐只使用以上公开页面做方法参考：动森取个人岛屿家园与 DIY 资源链，Minecraft 取资源到建设反馈，星穹铁道取星际电子入口和进入后规则变化；未复制任何画面或素材。

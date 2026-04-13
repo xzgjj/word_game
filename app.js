@@ -1,66 +1,313 @@
+const maxStack = 9999;
+
+const itemCatalog = [
+    ["Wood", "木材"],
+    ["Stone", "石子"],
+    ["FlowerSeed", "花种"],
+    ["RiverShell", "河贝"],
+    ["Fish", "鱼"],
+    ["EmotionShard", "表情碎片"],
+    ["OldCartridge", "旧卡带"],
+    ["StarCore", "星屑灯芯"],
+    ["Sticker", "贴纸"],
+];
+
+const emptySlotCount = 3;
+
+const blueprintNames = {
+    Bridge: "木桥",
+    FlowerBed: "花圃",
+    ForestSign: "林间路牌",
+    WoodFence: "木栅栏",
+    RiverLamp: "河岸灯",
+    StickerWall: "贴纸墙",
+    ArcadeBase: "游戏机底座",
+    CraftBench: "工作台",
+    CustomBuilding: "自建建筑",
+};
+
+const exchanges = [
+    { id: "exchange-emotion-shard", label: "换表情碎片", output: "EmotionShard", count: 1, cost: { Wood: 1, FlowerSeed: 1 } },
+    { id: "exchange-old-cartridge", label: "换旧卡带", output: "OldCartridge", count: 1, cost: { RiverShell: 1, Fish: 1 } },
+    { id: "exchange-star-core", label: "换星屑灯芯", output: "StarCore", count: 1, cost: { Stone: 2, RiverShell: 1 } },
+    { id: "exchange-sticker", label: "换贴纸", output: "Sticker", count: 1, cost: { Fish: 2, EmotionShard: 1 } },
+];
+
+const buildRecipes = {
+    Bridge: { Wood: 1 },
+    FlowerBed: { FlowerSeed: 2, Stone: 1 },
+    ForestSign: { Wood: 1, EmotionShard: 1 },
+    WoodFence: { Wood: 2 },
+    RiverLamp: { Wood: 1, StarCore: 1 },
+    ArcadeBase: { Stone: 2, StarCore: 1 },
+    CraftBench: { Wood: 2, Stone: 1 },
+};
+
+const buildSlots = {
+    Bridge: { x: 2, y: 0 },
+    FlowerBed: { x: 0, y: 0 },
+    ForestSign: { x: 1, y: 0 },
+    RiverLamp: { x: 2, y: 1 },
+    ArcadeBase: { x: 3, y: 0 },
+    WoodFence: { x: 0, y: 1 },
+    CraftBench: { x: 1, y: 1 },
+};
+
 const state = {
     location: "木屋前",
-    objective: "发现：空地有一台发光游戏机",
-    wood: 0,
-    stickers: 0,
-    shards: 0,
-    bridgeRepaired: false,
-    inPixelMode: false,
-    completed: false,
-    emotion: "joy",
+    hint: "先看看木屋前木牌，图纸会被记录下来。",
+    inventory: Object.fromEntries(itemCatalog.map(([id]) => [id, 0])),
+    unlockedBlueprints: new Set(),
+    knownSystems: new Set(),
+    placedBuildings: [],
+    builtCount: 0,
+    customBuildUnlocked: false,
+    miniGameUnlocked: false,
+    activeMiniGame: false,
+    miniGameStickers: 0,
+    stickerWallCount: 0,
     timeOfDay: "morning",
 };
 
-const emotionMeta = {
-    joy: {
-        emoji: "😄",
-        desc: "欢笑模式：短冲刺，适合越过一格缺口和快速拾取。",
-        gradient: "linear-gradient(180deg, #f4d35e, #ff6f61)",
-    },
-    calm: {
-        emoji: "🙂",
-        desc: "安静模式：短暂漂浮，适合通过移动平台和观察隐藏提示。",
-        gradient: "linear-gradient(180deg, #bdf7f0, #49b7c7)",
-    },
-    hype: {
-        emoji: "🤩",
-        desc: "激动模式：高跳触发按钮，打开像素小游戏的出口门。",
-        gradient: "linear-gradient(180deg, #ff6f61, #f4d35e)",
-    },
-};
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => Array.from(document.querySelectorAll(selector));
 
-const locationLabel = document.getElementById("locationLabel");
-const objectiveLabel = document.getElementById("objectiveLabel");
-const inventoryLabel = document.getElementById("inventoryLabel");
-const avatarToken = document.getElementById("avatarToken");
-const promptBubble = document.getElementById("promptBubble");
-const modeDesc = document.getElementById("modeDesc");
-const bridgeNode = document.getElementById("bridgeNode");
-const pixelHero = document.getElementById("pixelHero");
-const stickerCounter = document.getElementById("stickerCounter");
-const exitDoor = document.getElementById("exitDoor");
-const stepList = document.getElementById("stepList");
-const timeDesc = document.getElementById("timeDesc");
+const locationLabel = $("#locationLabel");
+const hintLabel = $("#hintLabel");
+const recordLabel = $("#recordLabel");
+const inventoryGrid = $("#inventoryGrid");
+const recipeList = $("#recipeList");
+const blueprintRow = $("#blueprintRow");
+const buildActions = $("#buildActions");
+const signboardState = $("#signboardState");
+const customState = $("#customState");
+const customBuildButton = $("#customBuildButton");
+const bridgeState = $("#bridgeState");
+const promptText = $("#promptText");
+const avatarToken = $("#avatarToken");
+const stickerWall = $("#stickerWall");
+const arcadeState = $("#arcadeState");
+const pixelConsole = $("#pixelConsole");
+const pixelStage = $("#pixelStage");
+const startMiniGame = $("#startMiniGame");
+const exitDoor = $("#exitDoor");
+const timeNote = $("#timeNote");
 
-const timeMeta = {
-    morning: "清晨适合采集木材和整理木屋周围。",
-    noon: "午后光线清楚，适合修桥、摆放花圃和查看河岸。",
-    night: "夜晚能看到游戏机和河岸灯的光，适合检查空地布置。",
-};
+function clampAdd(itemId, count) {
+    state.inventory[itemId] = Math.min(maxStack, state.inventory[itemId] + count);
+}
 
-function updateHud() {
-    locationLabel.textContent = state.location;
-    objectiveLabel.textContent = state.objective;
-    inventoryLabel.textContent = `木材 ${state.wood} / 贴纸 ${state.stickers} / 碎片 ${state.shards}`;
-    stickerCounter.textContent = `贴纸 ${state.stickers}/3`;
-    bridgeNode.classList.toggle("repaired", state.bridgeRepaired);
-    exitDoor.classList.toggle("ready", state.stickers >= 3);
+function canAfford(cost) {
+    return Object.entries(cost).every(([itemId, count]) => state.inventory[itemId] >= count);
+}
 
-    const steps = stepList.querySelectorAll("span");
-    steps[1].classList.toggle("done", state.wood > 0 || state.shards > 0);
-    steps[2].classList.toggle("done", state.bridgeRepaired);
-    steps[3].classList.toggle("done", state.inPixelMode || state.completed);
-    steps[4].classList.toggle("done", state.completed);
+function spend(cost) {
+    if (!canAfford(cost)) {
+        return false;
+    }
+
+    Object.entries(cost).forEach(([itemId, count]) => {
+        state.inventory[itemId] -= count;
+    });
+    return true;
+}
+
+function formatCost(cost) {
+    return Object.entries(cost)
+        .map(([itemId, count]) => `${itemName(itemId)} ${count}`)
+        .join(" / ");
+}
+
+function itemName(itemId) {
+    return itemCatalog.find(([id]) => id === itemId)?.[1] || itemId;
+}
+
+function openSignboard() {
+    state.knownSystems.add("signboard");
+    ["Bridge", "FlowerBed", "ForestSign"].forEach((blueprint) => state.unlockedBlueprints.add(blueprint));
+    state.location = "木屋前木牌";
+    state.hint = "木牌记录了可换物资、初始图纸和建设数量。";
+    prompt("木牌不是任务列表；它像小镇工具，告诉你材料能换什么、图纸解锁到哪里。");
+    render();
+}
+
+function discoverArcade() {
+    state.knownSystems.add("arcade");
+    state.miniGameUnlocked = state.inventory.OldCartridge > 0;
+    state.location = "空地游戏机";
+    state.hint = state.miniGameUnlocked ? "旧卡带已在包里，游戏机菜单可进入。" : "发现了游戏机菜单，但还缺旧卡带。";
+    prompt(state.hint);
+    render();
+}
+
+function gatherForest() {
+    clampAdd("Wood", 2);
+    clampAdd("FlowerSeed", 1);
+    state.location = "旁友森林";
+    state.hint = "森林树枝和草丛花种进入物品栏。";
+    moveAvatar("24%", "38%");
+    prompt("木材可修桥，花种可做花圃。材料来源和建设需求保持一一对应。");
+    render();
+}
+
+function gatherRiverbank() {
+    clampAdd("Stone", 2);
+    clampAdd("RiverShell", 1);
+    state.location = "河岸";
+    state.hint = "河岸石子和浅水河贝进入物品栏。";
+    moveAvatar("47%", "64%");
+    prompt("石子用于花圃、游戏机底座和星屑灯芯兑换；河贝可换旧卡带或星屑灯芯。");
+    render();
+}
+
+function fishRiver() {
+    clampAdd("Fish", 2);
+    state.location = "河水";
+    state.hint = "鱼进入物品栏，可兑换旧卡带或贴纸。";
+    moveAvatar("58%", "56%");
+    prompt("河水只提供鱼，不改变主世界地图数量。");
+    render();
+}
+
+function exchange(recipeId) {
+    openSignboard();
+    const recipe = exchanges.find((entry) => entry.id === recipeId);
+    if (!recipe || !spend(recipe.cost)) {
+        prompt("材料不足，先去森林、河岸或河水补齐基础材料。");
+        render();
+        return;
+    }
+
+    clampAdd(recipe.output, recipe.count);
+    if (recipe.output === "OldCartridge" && state.knownSystems.has("arcade")) {
+        state.miniGameUnlocked = true;
+    }
+    state.hint = `${recipe.label}完成：${itemName(recipe.output)} +${recipe.count}`;
+    prompt(`${recipe.label}完成。成长物资来自木牌兑换，基础材料仍来自主世界。`);
+    render();
+}
+
+function placeBuild(blueprint) {
+    if (!state.unlockedBlueprints.has(blueprint)) {
+        prompt("图纸未解锁。先看木牌，或通过修桥和小游戏获得后续图纸。");
+        return;
+    }
+
+    const slot = buildSlots[blueprint];
+    if (state.placedBuildings.some((placed) => placed.x === slot.x && placed.y === slot.y)) {
+        prompt("这个位置已经放过建设物。");
+        return;
+    }
+
+    const cost = buildRecipes[blueprint];
+    if (!spend(cost)) {
+        prompt(`材料不足：${blueprintNames[blueprint]}需要 ${formatCost(cost)}。`);
+        render();
+        return;
+    }
+
+    state.placedBuildings.push({ blueprint, ...slot });
+    state.builtCount += 1;
+    if (blueprint === "Bridge") {
+        state.unlockedBlueprints.add("WoodFence");
+        state.unlockedBlueprints.add("RiverLamp");
+        bridgeState.textContent = "木桥已修好";
+    }
+    unlockCustomIfReady();
+    state.hint = `${blueprintNames[blueprint]}已放置。`;
+    prompt(`${blueprintNames[blueprint]}写入 placedBuildings。建设反馈来自材料消耗和地图节点变化。`);
+    render();
+}
+
+function unlockCustomIfReady() {
+    if (state.builtCount >= 3) {
+        state.customBuildUnlocked = true;
+        state.unlockedBlueprints.add("CustomBuilding");
+    }
+}
+
+function placeCustomBuild() {
+    if (!state.customBuildUnlocked) {
+        prompt("自建建筑还没开启。先放置 3 个图纸物品。");
+        return;
+    }
+
+    const cost = { RiverShell: 1 };
+    if (!spend(cost)) {
+        prompt("受控自建需要河贝 1。");
+        render();
+        return;
+    }
+
+    state.placedBuildings.push({ blueprint: "CustomBuilding", x: 4, y: 1, material: "RiverShell", size: "1x1" });
+    state.builtCount += 1;
+    state.hint = "1x1 河贝小屋已试建。";
+    prompt("自建仍是受控组合，不进入完整体素沙盒。");
+    render();
+}
+
+function startMiniGameFlow() {
+    discoverArcade();
+    if (!state.miniGameUnlocked || state.inventory.OldCartridge < 1) {
+        prompt("游戏机菜单已发现，但需要旧卡带。去木牌用河贝和鱼兑换。");
+        return;
+    }
+
+    state.activeMiniGame = true;
+    state.miniGameStickers = 0;
+    state.location = "像素小游戏";
+    state.hint = "收集 3 个贴纸后出口点亮。";
+    $$(".pixel-sticker").forEach((button) => button.classList.remove("collected"));
+    document.body.dataset.mode = "pixel";
+    pixelStage.classList.add("active");
+    prompt("进入像素模式后规则变了：目标是贴纸和出口，不再采集主世界材料。");
+    render();
+}
+
+function collectMiniGameSticker(button) {
+    if (!state.activeMiniGame || button.classList.contains("collected")) {
+        prompt("先从游戏机菜单进入像素小游戏。");
+        return;
+    }
+
+    button.classList.add("collected");
+    state.miniGameStickers = Math.min(3, state.miniGameStickers + 1);
+    state.hint = state.miniGameStickers >= 3 ? "出口已点亮，可以回到主世界。" : `贴纸 ${state.miniGameStickers}/3`;
+    prompt(state.hint);
+    render();
+}
+
+function finishMiniGame() {
+    if (!state.activeMiniGame || state.miniGameStickers < 3) {
+        prompt("出口还没亮。收集 3 个贴纸后再离开。");
+        return;
+    }
+
+    state.activeMiniGame = false;
+    state.miniGameStickers = 0;
+    state.stickerWallCount += 1;
+    clampAdd("Sticker", 1);
+    state.unlockedBlueprints.add("StickerWall");
+    state.unlockedBlueprints.add("ArcadeBase");
+    state.location = "空地游戏机";
+    state.hint = "贴纸墙更新，后续图纸已记录到木牌。";
+    document.body.dataset.mode = "world";
+    pixelStage.classList.remove("active");
+    prompt("小游戏完成后回到主世界，木屋贴纸墙 +1，木牌新增贴纸墙和游戏机底座图纸。");
+    render();
+}
+
+function setTimeOfDay(timeKey) {
+    state.timeOfDay = timeKey;
+    document.body.dataset.time = timeKey;
+    const notes = {
+        morning: "清晨提示更清楚",
+        noon: "午后适合看建设空位",
+        night: "夜晚能看见电子入口和河岸灯",
+    };
+    timeNote.textContent = notes[timeKey];
+    prompt(notes[timeKey]);
+    render();
 }
 
 function moveAvatar(left, top) {
@@ -68,126 +315,116 @@ function moveAvatar(left, top) {
     avatarToken.style.top = top;
 }
 
-function setEmotion(mode) {
-    const meta = emotionMeta[mode];
-    state.emotion = mode;
-    avatarToken.textContent = meta.emoji;
-    avatarToken.style.background = meta.gradient;
-    pixelHero.textContent = meta.emoji;
-    modeDesc.textContent = meta.desc;
+function prompt(text) {
+    promptText.textContent = text;
+}
 
-    document.querySelectorAll(".mode-button").forEach((button) => {
-        button.classList.toggle("active", button.dataset.mode === mode);
+function renderInventory() {
+    inventoryGrid.innerHTML = "";
+    itemCatalog.forEach(([itemId, label]) => {
+        const slot = document.createElement("div");
+        slot.className = "inventory-slot";
+        slot.innerHTML = `<span>${label}</span><strong>${state.inventory[itemId]}</strong>`;
+        inventoryGrid.appendChild(slot);
+    });
+
+    for (let index = 0; index < emptySlotCount; index += 1) {
+        const slot = document.createElement("div");
+        slot.className = "inventory-slot empty";
+        slot.innerHTML = `<span>预留</span><strong>空</strong>`;
+        inventoryGrid.appendChild(slot);
+    }
+}
+
+function renderRecipes() {
+    recipeList.innerHTML = "";
+    exchanges.forEach((recipe) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "recipe-button";
+        button.disabled = !canAfford(recipe.cost);
+        button.dataset.recipe = recipe.id;
+        button.innerHTML = `<span>${recipe.label}</span><small>${formatCost(recipe.cost)}</small>`;
+        button.addEventListener("click", () => exchange(recipe.id));
+        recipeList.appendChild(button);
     });
 }
 
-function setTimeOfDay(timeKey) {
-    state.timeOfDay = timeKey;
-    document.body.dataset.time = timeKey;
-    timeDesc.textContent = timeMeta[timeKey];
-    document.querySelectorAll(".time-button").forEach((button) => {
-        button.classList.toggle("active", button.dataset.time === timeKey);
+function renderBlueprints() {
+    blueprintRow.innerHTML = "";
+    if (state.unlockedBlueprints.size === 0) {
+        blueprintRow.innerHTML = "<span>打开木牌后记录初始图纸</span>";
+        return;
+    }
+
+    Array.from(state.unlockedBlueprints).forEach((blueprint) => {
+        const chip = document.createElement("span");
+        chip.textContent = blueprintNames[blueprint];
+        blueprintRow.appendChild(chip);
     });
 }
 
-function handleWorldAction(action) {
-    if (action === "home") {
-        state.location = "木屋前";
-        state.objective = state.completed ? "发现：贴纸墙新增了一张贴纸" : "发现：空地有一台发光游戏机";
-        promptBubble.textContent = state.completed
-            ? "贴纸墙已经更新，第一轮闭环完成。"
-            : "木屋周围可以继续摆放花圃、路牌和河岸灯。";
-        avatarToken.classList.remove("pixel");
-        moveAvatar("236px", "250px");
-    }
-
-    if (action === "forage") {
-        state.location = "旁友森林";
-        state.wood = Math.max(state.wood, 1);
-        state.shards = Math.max(state.shards, 1);
-        state.objective = "发现：木材可用于修桥或制作木屋周围摆件";
-        promptBubble.textContent = "拾取到木材和表情碎片。建设清单会显示这些材料能做什么。";
-        moveAvatar("58%", "310px");
-    }
-
-    if (action === "arcade") {
-        if (!state.bridgeRepaired) {
-            if (state.wood < 1) {
-                state.objective = "发现：木桥缺少 1 个木材";
-                promptBubble.textContent = "木桥还不能修，森林里的树枝可以作为木材。";
-                updateHud();
-                return;
-            }
-
-            state.bridgeRepaired = true;
-            state.location = "河边木桥";
-            state.objective = "发现：河岸和空地已经连通";
-            promptBubble.textContent = "木桥补齐。空地游戏机开始发光，玩家可以自己选择是否进入。";
-            moveAvatar("50%", "355px");
-            updateHud();
-            return;
-        }
-
-        state.location = "空地游戏机";
-        state.inPixelMode = true;
-        state.objective = "发现：像素模式需要 3 个贴纸点亮出口";
-        promptBubble.textContent = "拾取游戏卡带，主角像素化。点击小游戏里的贴纸，收齐后点出口返回主世界。";
-        avatarToken.classList.add("pixel");
-        moveAvatar("74%", "456px");
-    }
-
-    updateHud();
+function renderBuildActions() {
+    buildActions.innerHTML = "";
+    Object.keys(buildRecipes).forEach((blueprint) => {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.disabled = !state.unlockedBlueprints.has(blueprint);
+        button.textContent = blueprintNames[blueprint];
+        button.addEventListener("click", () => placeBuild(blueprint));
+        buildActions.appendChild(button);
+    });
 }
 
-function collectSticker(button) {
-    if (!state.inPixelMode || button.classList.contains("collected")) {
-        promptBubble.textContent = "先从空地游戏机进入像素模式，再收集贴纸。";
-        return;
-    }
+function renderWorld() {
+    $$(".build-slot, .bridge-slot").forEach((button) => {
+        const blueprint = button.dataset.build;
+        button.classList.toggle("placed", state.placedBuildings.some((placed) => placed.blueprint === blueprint));
+    });
 
-    button.classList.add("collected");
-    state.stickers += 1;
-    state.objective = state.stickers >= 3 ? "发现：出口已经点亮" : "发现：贴纸可以装饰木屋贴纸墙";
-    promptBubble.textContent = state.stickers >= 3
-        ? "3 个贴纸已收齐。现在可以点击出口回到主世界。"
-        : "贴纸飞入 HUD。小游戏保持轻松，不设置惩罚。";
-    updateHud();
+    stickerWall.textContent = `贴纸墙 ${state.stickerWallCount}`;
+    signboardState.textContent = state.knownSystems.has("signboard") ? "已打开" : "未查看";
+    customState.textContent = state.customBuildUnlocked ? "自建已开启" : `建设 ${state.builtCount}/3 后开启`;
+    customBuildButton.disabled = !state.customBuildUnlocked;
+    arcadeState.textContent = state.knownSystems.has("arcade")
+        ? (state.miniGameUnlocked ? "旧卡带已就绪，可自主进入。" : "已发现菜单，缺旧卡带。")
+        : "还没查看空地游戏机。";
+    startMiniGame.disabled = !state.miniGameUnlocked && state.inventory.OldCartridge < 1;
+    exitDoor.classList.toggle("ready", state.activeMiniGame && state.miniGameStickers >= 3);
 }
 
-function exitMiniGame() {
-    if (state.stickers < 3) {
-        promptBubble.textContent = "出口还没亮。先收集 3 个贴纸。";
-        return;
-    }
-
-    state.inPixelMode = false;
-    state.completed = true;
-    state.location = "空地游戏机";
-    state.objective = "发现：贴纸墙可以更新";
-    promptBubble.textContent = "小游戏完成，回到主世界。游戏机点亮，木屋贴纸墙会新增贴纸。";
-    avatarToken.classList.remove("pixel");
-    moveAvatar("74%", "456px");
-    updateHud();
+function render() {
+    unlockCustomIfReady();
+    locationLabel.textContent = state.location;
+    hintLabel.textContent = state.hint;
+    recordLabel.textContent = `建设 ${state.builtCount}/3 · ${state.customBuildUnlocked ? "自建已开启" : "自建未开启"}`;
+    renderInventory();
+    renderRecipes();
+    renderBlueprints();
+    renderBuildActions();
+    renderWorld();
+    $$("#timeButtons button").forEach((button) => button.classList.toggle("active", button.dataset.time === state.timeOfDay));
 }
 
-document.querySelectorAll(".mode-button").forEach((button) => {
-    button.addEventListener("click", () => setEmotion(button.dataset.mode));
+$$("[data-action]").forEach((button) => {
+    button.addEventListener("click", () => {
+        const action = button.dataset.action;
+        if (action === "open-signboard") openSignboard();
+        if (action === "gather-forest") gatherForest();
+        if (action === "gather-riverbank") gatherRiverbank();
+        if (action === "fish-river") fishRiver();
+        if (action === "open-arcade") discoverArcade();
+    });
 });
 
-document.querySelectorAll(".time-button").forEach((button) => {
-    button.addEventListener("click", () => setTimeOfDay(button.dataset.time));
+$$("[data-build]").forEach((button) => {
+    button.addEventListener("click", () => placeBuild(button.dataset.build));
 });
 
-document.querySelectorAll(".map-node").forEach((node) => {
-    node.addEventListener("click", () => handleWorldAction(node.dataset.action));
-});
+$$(".pixel-sticker").forEach((button) => button.addEventListener("click", () => collectMiniGameSticker(button)));
+$$("[data-time]").forEach((button) => button.addEventListener("click", () => setTimeOfDay(button.dataset.time)));
+customBuildButton.addEventListener("click", placeCustomBuild);
+startMiniGame.addEventListener("click", startMiniGameFlow);
+exitDoor.addEventListener("click", finishMiniGame);
 
-document.querySelectorAll(".sticker").forEach((button) => {
-    button.addEventListener("click", () => collectSticker(button));
-});
-
-exitDoor.addEventListener("click", exitMiniGame);
-
-setEmotion("joy");
-setTimeOfDay("morning");
-updateHud();
+render();
