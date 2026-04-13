@@ -15,6 +15,8 @@
 | `assets/reference/visual-benchmark/animal_crossing_dialog_interaction_reference.webp` | 用户提供，本地源文件 `C:\Users\72440\Desktop\OIP-C.webp` | 仅作内部方法对标参考，不进入游戏发布资产 | 生活化对话气泡、NPC/物件互动反馈分析 | 原图复制入参考目录；SHA256 `CB8C5F75906576A7040CD69C11865564F9B31BE70E7956804067D03D3B92AFAB` | 内部参考，禁止复制素材 |
 | `assets/reference/visual-benchmark/animal_crossing_terrain_plot_reference.png` | 用户提供，本地源文件 `C:\Users\72440\Desktop\PixPin_2026-04-13_10-52-42.png` | 仅作内部方法对标参考，不进入游戏发布资产 | 非矩形地形、围栏边界、可建造地块和地面材质块分析 | 原图复制入参考目录；SHA256 `9DC41718AFBF69FDEBCC3E0B2F707D858DE792137CCC253E6F6A61A884BDA14F` | 内部参考，禁止复制素材 |
 | `assets/reference/visual-benchmark/animal_crossing_inventory_reference.jpg` | 用户提供，本地源文件 `C:\Users\72440\Desktop\v2-6eacba3eef80a2339fb147bf9269c6be_r.jpg` | 仅作内部方法对标参考，不进入游戏发布资产 | 背包大圆角容器、图标网格、货币与操作提示分析 | 原图复制入参考目录；SHA256 `772DF6500639F06BFE1D4933CF3E637BCA5487AB69CB0541DCDD40B636FC54FA` | 内部参考，禁止复制素材 |
+| `.local-assets/kenney/kenney_nature-kit.zip`、`unity/Assets/External/Kenney/NatureKit/OBJ/*` | Kenney Nature Kit 2.1，官网 `https://kenney.nl/assets/nature-kit` | Creative Commons CC0；License.txt 写明可用于 personal / educational / commercial projects | 阶段 8C 个人实验原型：树、花、石、木桥、木材等低模候选素材 | 下载 zip 到 `.local-assets/kenney/`，只复制少量 OBJ/MTL 到 `unity/Assets/External/Kenney/NatureKit/OBJ/`；该目录本地 exclude，不上传 | CC0-ready，本地实验导入，发布前可继续保留或二次复核 |
+| `.local-assets/kenney/kenney_ui-pack.zip`、`unity/Assets/Resources/KenneyUI/*` | Kenney UI Pack 2.0，官网 `https://kenney.nl/assets/ui-pack` | Creative Commons CC0；License.txt 写明可用于 personal / educational / commercial projects | 阶段 8C 个人实验原型：背包格、装备圆环、面板底图候选 | 下载 zip 到 `.local-assets/kenney/`，只复制少量 PNG 到 `unity/Assets/Resources/KenneyUI/`；该目录资源按本地实验处理 | CC0-ready，本地实验导入，发布前可继续保留或二次复核 |
 
 ## 候选开源来源
 

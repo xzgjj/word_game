@@ -25,6 +25,7 @@ namespace StarryForest.EditorTools
         [MenuItem("Starry Forest/Build WorldHub Scene")]
         public static void BuildWorldHubScene()
         {
+            AssetDatabase.Refresh();
             Scene scene = EditorSceneManager.NewScene(NewSceneSetup.EmptyScene, NewSceneMode.Single);
 
             GameObject root = new GameObject("WorldHub");
@@ -99,17 +100,28 @@ namespace StarryForest.EditorTools
             player.AddComponent<PlayerController>();
             player.transform.SetParent(root);
 
-            CreateCube("PlayerBody_AethelProxy", new Vector3(0f, 0.55f, 0f), new Vector3(0.48f, 0.82f, 0.32f), new Color(0.19f, 0.11f, 0.28f), player.transform);
-            CreateCube("PlayerDressLayer", new Vector3(0f, 0.3f, -0.04f), new Vector3(0.66f, 0.36f, 0.28f), new Color(0.31f, 0.16f, 0.42f), player.transform);
-            CreateCube("PlayerFace", new Vector3(0f, 1.13f, -0.08f), new Vector3(0.38f, 0.26f, 0.12f), new Color(0.92f, 0.78f, 0.74f), player.transform);
-            CreateCube("PlayerLongHair", new Vector3(0f, 0.8f, 0.14f), new Vector3(0.62f, 1.18f, 0.18f), new Color(0.045f, 0.04f, 0.065f), player.transform);
-            CreateCube("PlayerHairTailLeft", new Vector3(-0.34f, 0.45f, 0.08f), new Vector3(0.14f, 0.86f, 0.12f), new Color(0.045f, 0.04f, 0.065f), player.transform);
-            CreateCube("PlayerHairTailRight", new Vector3(0.34f, 0.45f, 0.08f), new Vector3(0.14f, 0.86f, 0.12f), new Color(0.045f, 0.04f, 0.065f), player.transform);
-            CreateCube("PlayerShellFeather", new Vector3(0.34f, 1.22f, -0.02f), new Vector3(0.12f, 0.48f, 0.08f), new Color(0.88f, 0.92f, 0.94f), player.transform);
-            CreateCube("PlayerShellPin", new Vector3(0.25f, 1.08f, -0.1f), new Vector3(0.16f, 0.12f, 0.08f), new Color(0.72f, 0.75f, 0.78f), player.transform);
-            CreateCube("PlayerCoralAccent", new Vector3(-0.28f, 0.64f, -0.13f), new Vector3(0.1f, 0.4f, 0.08f), new Color(0.82f, 0.28f, 0.33f), player.transform);
-            CreateCube("SpiritFish_Quiet", new Vector3(0.76f, 0.86f, -0.14f), new Vector3(0.36f, 0.16f, 0.08f), new Color(0.42f, 0.82f, 0.94f), player.transform, true);
-            CreateCube("SpiritFish_Tail", new Vector3(0.52f, 0.86f, -0.14f), new Vector3(0.12f, 0.24f, 0.06f), new Color(0.62f, 0.9f, 0.96f), player.transform, true);
+            CreateSphere("PlayerHead_AethelProxy", new Vector3(0f, 1.16f, -0.04f), new Vector3(0.46f, 0.44f, 0.32f), new Color(0.92f, 0.78f, 0.74f), player.transform);
+            CreateCube("PlayerBody_AethelProxy", new Vector3(0f, 0.6f, 0f), new Vector3(0.46f, 0.82f, 0.32f), new Color(0.19f, 0.11f, 0.28f), player.transform);
+            CreateCube("PlayerDressLayer_UpperPurple", new Vector3(0f, 0.4f, -0.04f), new Vector3(0.68f, 0.36f, 0.28f), new Color(0.31f, 0.16f, 0.42f), player.transform);
+            CreateCube("PlayerDressLayer_LowerWave", new Vector3(0f, 0.18f, -0.02f), new Vector3(0.82f, 0.24f, 0.26f), new Color(0.42f, 0.18f, 0.52f), player.transform);
+            CreateCube("PlayerLongHair_BackSheet", new Vector3(0f, 0.78f, 0.16f), new Vector3(0.72f, 1.28f, 0.16f), new Color(0.045f, 0.04f, 0.065f), player.transform);
+            CreateCube("PlayerHairFringe_Left", new Vector3(-0.16f, 1.28f, -0.18f), new Vector3(0.18f, 0.26f, 0.08f), new Color(0.04f, 0.035f, 0.058f), player.transform);
+            CreateCube("PlayerHairFringe_Right", new Vector3(0.12f, 1.28f, -0.18f), new Vector3(0.2f, 0.22f, 0.08f), new Color(0.04f, 0.035f, 0.058f), player.transform);
+            CreateCube("PlayerHairTailLeft", new Vector3(-0.42f, 0.45f, 0.08f), new Vector3(0.16f, 0.92f, 0.12f), new Color(0.045f, 0.04f, 0.065f), player.transform);
+            CreateCube("PlayerHairTailRight", new Vector3(0.42f, 0.45f, 0.08f), new Vector3(0.16f, 0.92f, 0.12f), new Color(0.045f, 0.04f, 0.065f), player.transform);
+            CreateCube("PlayerQuietEye_Left", new Vector3(-0.11f, 1.18f, -0.22f), new Vector3(0.08f, 0.03f, 0.04f), new Color(0.18f, 0.12f, 0.26f), player.transform);
+            CreateCube("PlayerQuietEye_Right", new Vector3(0.11f, 1.18f, -0.22f), new Vector3(0.08f, 0.03f, 0.04f), new Color(0.18f, 0.12f, 0.26f), player.transform);
+            CreateCube("PlayerCalmMouth", new Vector3(0f, 1.08f, -0.23f), new Vector3(0.12f, 0.025f, 0.04f), new Color(0.36f, 0.16f, 0.2f), player.transform);
+            CreateCube("PlayerShellFeather_Tall", new Vector3(0.36f, 1.35f, -0.02f), new Vector3(0.12f, 0.52f, 0.07f), new Color(0.9f, 0.93f, 0.94f), player.transform);
+            CreateCube("PlayerShellFeather_Side", new Vector3(0.46f, 1.22f, -0.03f), new Vector3(0.1f, 0.36f, 0.06f), new Color(0.82f, 0.86f, 0.9f), player.transform);
+            CreateSphere("PlayerShellPin", new Vector3(0.27f, 1.13f, -0.16f), new Vector3(0.16f, 0.12f, 0.08f), new Color(0.72f, 0.75f, 0.78f), player.transform);
+            CreateCube("PlayerCoralAccent_Left", new Vector3(-0.3f, 0.66f, -0.13f), new Vector3(0.1f, 0.42f, 0.08f), new Color(0.82f, 0.28f, 0.33f), player.transform);
+            CreateCube("PlayerCoralAccent_Right", new Vector3(0.3f, 0.5f, -0.13f), new Vector3(0.08f, 0.28f, 0.08f), new Color(0.72f, 0.22f, 0.42f), player.transform);
+            CreateCube("PlayerLeg_Left", new Vector3(-0.14f, -0.22f, -0.02f), new Vector3(0.16f, 0.46f, 0.14f), new Color(0.08f, 0.07f, 0.12f), player.transform);
+            CreateCube("PlayerLeg_Right", new Vector3(0.14f, -0.22f, -0.02f), new Vector3(0.16f, 0.46f, 0.14f), new Color(0.08f, 0.07f, 0.12f), player.transform);
+            CreateSphere("SpiritFish_Quiet", new Vector3(0.84f, 0.88f, -0.14f), new Vector3(0.42f, 0.2f, 0.1f), new Color(0.42f, 0.82f, 0.94f), player.transform, true);
+            CreateCube("SpiritFish_Tail", new Vector3(0.55f, 0.88f, -0.14f), new Vector3(0.14f, 0.28f, 0.06f), new Color(0.62f, 0.9f, 0.96f), player.transform, true);
+            CreateCube("SpiritFish_GlowTrail", new Vector3(0.44f, 0.78f, -0.16f), new Vector3(0.24f, 0.06f, 0.04f), new Color(0.72f, 0.95f, 1f), player.transform, true);
         }
 
         private static void CreateHomeArea(Transform root)
@@ -139,16 +151,20 @@ namespace StarryForest.EditorTools
 
         private static void CreateForest(Transform root)
         {
-            CreateTree("ForestTree_AnchorLeft", new Vector3(-7.2f, 0f, 2.2f), 1.2f, root);
-            CreateTree("ForestTree_BackLeft", new Vector3(-6.1f, 0f, 3.7f), 0.95f, root);
-            CreateTree("ForestTree_BackCenter", new Vector3(-4.55f, 0f, 3.35f), 0.9f, root);
-            CreateTree("ForestTree_AnchorRight", new Vector3(-3.35f, 0f, 2.35f), 1.1f, root);
-            CreateTree("ForestTree_FarSoft_1", new Vector3(-7.75f, 0f, 4.55f), 0.7f, root);
-            CreateTree("ForestTree_FarSoft_2", new Vector3(-2.75f, 0f, 4.25f), 0.72f, root);
+            CreateTree("ForestTree_AnchorLeft", new Vector3(-7.2f, 0f, 2.2f), 1.2f, root, "tree_pineRoundA");
+            CreateTree("ForestTree_BackLeft", new Vector3(-6.1f, 0f, 3.7f), 0.95f, root, "tree_pineRoundB");
+            CreateTree("ForestTree_BackCenter", new Vector3(-4.55f, 0f, 3.35f), 0.9f, root, "tree_oak");
+            CreateTree("ForestTree_AnchorRight", new Vector3(-3.35f, 0f, 2.35f), 1.1f, root, "tree_pineRoundA");
+            CreateTree("ForestTree_FarSoft_1", new Vector3(-7.75f, 0f, 4.55f), 0.7f, root, "tree_small");
+            CreateTree("ForestTree_FarSoft_2", new Vector3(-2.75f, 0f, 4.25f), 0.72f, root, "tree_small");
 
             CreateCube("ForestShadowPatch", new Vector3(-5.4f, 0.02f, 2.6f), new Vector3(4.4f, 0.04f, 2.2f), new Color(0.27f, 0.5f, 0.28f), root);
-            CreateNode("ForestBranchNode", "forest-branch", "森林树枝", "拾取木材", new Vector3(-6.35f, 0.15f, 1.08f), new Vector3(0.78f, 0.18f, 0.25f), new Color(0.48f, 0.28f, 0.16f)).transform.SetParent(root);
-            CreateNode("ForestFlowerSeedNode", "forest-flower-seed", "森林花种", "收起花种", new Vector3(-4.55f, 0.12f, 0.75f), new Vector3(0.38f, 0.24f, 0.38f), new Color(0.92f, 0.68f, 0.76f)).transform.SetParent(root);
+            CreateModelNode("ForestBranchNode", "forest-branch", "森林树枝", "拾取木材", "log", new Vector3(-6.35f, 0.15f, 1.08f), new Vector3(0.22f, 0.22f, 0.22f), new Color(0.48f, 0.28f, 0.16f), root);
+            CreateModelNode("ForestFlowerSeedNode", "forest-flower-seed", "森林花种", "收起花种", "flower_purpleA", new Vector3(-4.55f, 0.12f, 0.75f), new Vector3(0.28f, 0.28f, 0.28f), new Color(0.92f, 0.68f, 0.76f), root);
+            CreateKenneyModel("flower_redA", "ForestGarden_RedFlowers", new Vector3(-5.35f, 0.1f, 1.55f), new Vector3(0.22f, 0.22f, 0.22f), root, new Color(0.92f, 0.36f, 0.44f));
+            CreateKenneyModel("flower_yellowA", "ForestGarden_YellowFlowers", new Vector3(-4.05f, 0.1f, 1.55f), new Vector3(0.22f, 0.22f, 0.22f), root, new Color(0.95f, 0.78f, 0.34f));
+            CreateCube("ForestKoinoboriHint_Pole", new Vector3(-4.0f, 1.0f, 2.1f), new Vector3(0.06f, 1.8f, 0.06f), new Color(0.62f, 0.62f, 0.58f), root);
+            CreateCube("ForestKoinoboriHint_Ribbon", new Vector3(-3.65f, 1.55f, 2.1f), new Vector3(0.7f, 0.16f, 0.05f), new Color(0.86f, 0.36f, 0.3f), root);
         }
 
         private static void CreateRiver(Transform root)
@@ -161,15 +177,18 @@ namespace StarryForest.EditorTools
             CreateCube("RiverHighlight_South", new Vector3(0.05f, 0.07f, -3.6f), new Vector3(0.08f, 0.04f, 2.0f), new Color(0.58f, 0.9f, 0.92f), river.transform, true);
             CreateCube("RiverHighlight_North", new Vector3(0.1f, 0.07f, 1.8f), new Vector3(0.08f, 0.04f, 2.5f), new Color(0.58f, 0.9f, 0.92f), river.transform, true);
 
-            CreateNode("RiverStoneNode", "river-stone", "河岸石子", "捡起石子", new Vector3(-0.8f, 0.15f, -1.75f), new Vector3(0.48f, 0.26f, 0.42f), new Color(0.45f, 0.47f, 0.48f)).transform.SetParent(root);
+            CreateModelNode("RiverStoneNode", "river-stone", "河岸石子", "捡起石子", "rock_smallA", new Vector3(-0.8f, 0.15f, -1.75f), new Vector3(0.24f, 0.24f, 0.24f), new Color(0.45f, 0.47f, 0.48f), root);
             CreateNode("RiverShellNode", "river-shell", "河贝", "捡起河贝", new Vector3(1.95f, 0.09f, -2.25f), new Vector3(0.48f, 0.16f, 0.36f), new Color(0.9f, 0.82f, 0.68f)).transform.SetParent(root);
             CreateNode("RiverFishNode", "river-fish", "河水鱼影", "钓一下鱼", new Vector3(0.72f, 0.08f, 1.25f), new Vector3(0.68f, 0.06f, 0.34f), new Color(0.1f, 0.23f, 0.36f)).transform.SetParent(root);
         }
 
         private static void CreateBridgeAndBuildSlots(Transform root)
         {
-            GameObject bridge = CreateNode("DamagedBridge", "river-bridge", "半损坏木桥", "修一下木桥", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.22f, 0.8f), new Color(0.52f, 0.34f, 0.19f), 2.6f);
-            GameObject repairedBridge = CreateCube("RepairedBridge", new Vector3(0f, 0.08f, 0f), new Vector3(2.8f, 0.25f, 1.0f), new Color(0.72f, 0.47f, 0.26f), bridge.transform);
+            GameObject bridge = CreateNode("DamagedBridge", "river-bridge", "半损坏木桥", "修一下木桥", new Vector3(0.8f, 0.15f, -3.2f), new Vector3(2.6f, 0.12f, 0.8f), new Color(0.52f, 0.34f, 0.19f), 2.6f);
+            CreateCube("DamagedBridge_GapShadow", new Vector3(0.12f, 0.16f, 0f), new Vector3(0.56f, 0.08f, 0.92f), new Color(0.15f, 0.11f, 0.09f), bridge.transform);
+            CreateCube("DamagedBridge_LeftBoard", new Vector3(-0.72f, 0.22f, 0f), new Vector3(0.72f, 0.12f, 0.78f), new Color(0.42f, 0.25f, 0.14f), bridge.transform);
+            CreateCube("DamagedBridge_RightBoard", new Vector3(0.92f, 0.22f, 0f), new Vector3(0.72f, 0.12f, 0.78f), new Color(0.42f, 0.25f, 0.14f), bridge.transform);
+            GameObject repairedBridge = CreateKenneyModel("bridge_woodNarrow", "RepairedBridge", new Vector3(0f, 0.08f, 0f), new Vector3(0.42f, 0.42f, 0.42f), bridge.transform, new Color(0.72f, 0.47f, 0.26f));
             bridge.AddComponent<BuildPlacementView>().Configure("river-bridge", BlueprintId.Bridge, 8, 2, repairedBridge);
             bridge.transform.SetParent(root);
 
@@ -245,8 +264,9 @@ namespace StarryForest.EditorTools
             bed.transform.SetParent(parent);
             bed.transform.localPosition = new Vector3(0f, 0.28f, 0f);
             CreateCube($"{name}_Soil", Vector3.zero, new Vector3(1.05f, 0.18f, 0.72f), new Color(0.48f, 0.32f, 0.22f), bed.transform);
-            CreateCube($"{name}_PinkFlowers", new Vector3(-0.28f, 0.18f, -0.16f), new Vector3(0.28f, 0.28f, 0.22f), new Color(0.92f, 0.48f, 0.68f), bed.transform);
-            CreateCube($"{name}_YellowFlowers", new Vector3(0.18f, 0.18f, 0.08f), new Vector3(0.3f, 0.26f, 0.24f), new Color(0.95f, 0.78f, 0.34f), bed.transform);
+            CreateKenneyModel("flower_redA", $"{name}_PinkFlowers", new Vector3(-0.28f, 0.16f, -0.16f), new Vector3(0.2f, 0.2f, 0.2f), bed.transform, new Color(0.92f, 0.48f, 0.68f));
+            CreateKenneyModel("flower_yellowA", $"{name}_YellowFlowers", new Vector3(0.18f, 0.16f, 0.08f), new Vector3(0.2f, 0.2f, 0.2f), bed.transform, new Color(0.95f, 0.78f, 0.34f));
+            CreateKenneyModel("flower_purpleA", $"{name}_PurpleFlowers", new Vector3(0f, 0.16f, -0.28f), new Vector3(0.16f, 0.16f, 0.16f), bed.transform, new Color(0.7f, 0.56f, 0.9f));
             CreateCube($"{name}_LeafCluster", new Vector3(0.34f, 0.15f, -0.22f), new Vector3(0.24f, 0.22f, 0.2f), new Color(0.35f, 0.66f, 0.36f), bed.transform);
             return bed;
         }
@@ -267,8 +287,14 @@ namespace StarryForest.EditorTools
             CreateCube($"{name}_Shine", new Vector3(0f, 0.03f, -0.05f), new Vector3(0.13f, 0.13f, 0.04f), new Color(1f, 0.95f, 0.45f), sticker.transform, true);
         }
 
-        private static void CreateTree(string name, Vector3 position, float size, Transform root)
+        private static void CreateTree(string name, Vector3 position, float size, Transform root, string modelAssetName = null)
         {
+            if (!string.IsNullOrEmpty(modelAssetName)
+                && CreateKenneyModel(modelAssetName, name, position, Vector3.one * (0.42f * size), root, new Color(0.2f, 0.52f, 0.28f)) != null)
+            {
+                return;
+            }
+
             GameObject tree = new GameObject(name);
             tree.transform.position = position;
             tree.transform.SetParent(root);
@@ -292,9 +318,68 @@ namespace StarryForest.EditorTools
             return node;
         }
 
+        private static GameObject CreateModelNode(
+            string name,
+            string nodeId,
+            string label,
+            string prompt,
+            string modelAssetName,
+            Vector3 position,
+            Vector3 modelScale,
+            Color fallbackColor,
+            Transform root,
+            float interactionRadius = 1.5f)
+        {
+            GameObject node = new GameObject(name);
+            node.transform.SetParent(root);
+            node.transform.localPosition = position;
+            node.AddComponent<WorldNodeInteractor>().Configure(nodeId, label, prompt, interactionRadius);
+            GameObject model = CreateKenneyModel(modelAssetName, $"{name}_Model", Vector3.zero, modelScale, node.transform, fallbackColor);
+            if (model == null)
+            {
+                CreateCube($"{name}_Fallback", Vector3.zero, modelScale, fallbackColor, node.transform);
+            }
+
+            return node;
+        }
+
+        private static GameObject CreateKenneyModel(string assetName, string instanceName, Vector3 position, Vector3 scale, Transform parent, Color fallbackColor)
+        {
+            string assetPath = $"Assets/External/Kenney/NatureKit/OBJ/{assetName}.obj";
+            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(assetPath);
+            if (prefab == null)
+            {
+                return null;
+            }
+
+            GameObject instance = (GameObject)PrefabUtility.InstantiatePrefab(prefab);
+            instance.name = instanceName;
+            instance.transform.SetParent(parent);
+            instance.transform.localPosition = position;
+            instance.transform.localRotation = Quaternion.identity;
+            instance.transform.localScale = scale;
+            Material material = CreateMaterial($"{instanceName}_Material", fallbackColor);
+            foreach (Renderer renderer in instance.GetComponentsInChildren<Renderer>())
+            {
+                renderer.sharedMaterial = material;
+            }
+
+            return instance;
+        }
+
         private static GameObject CreateCube(string name, Vector3 position, Vector3 scale, Color color, Transform parent = null, bool emission = false)
         {
-            GameObject gameObject = GameObject.CreatePrimitive(PrimitiveType.Cube);
+            return CreatePrimitive(PrimitiveType.Cube, name, position, scale, color, parent, emission);
+        }
+
+        private static GameObject CreateSphere(string name, Vector3 position, Vector3 scale, Color color, Transform parent = null, bool emission = false)
+        {
+            return CreatePrimitive(PrimitiveType.Sphere, name, position, scale, color, parent, emission);
+        }
+
+        private static GameObject CreatePrimitive(PrimitiveType primitiveType, string name, Vector3 position, Vector3 scale, Color color, Transform parent = null, bool emission = false)
+        {
+            GameObject gameObject = GameObject.CreatePrimitive(primitiveType);
             gameObject.name = name;
             gameObject.transform.SetParent(parent);
             gameObject.transform.localPosition = parent == null ? position : position;
