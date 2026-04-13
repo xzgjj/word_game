@@ -80,5 +80,39 @@ namespace StarryForest.Tests.EditMode
             Assert.IsFalse(result.Success);
             Assert.IsNull(result.State);
         }
+
+        [Test]
+        public void SaveSlotServiceManagesManualSlotsAndProtectsAutoSlot()
+        {
+            string rootPath = Path.Combine(Path.GetTempPath(), "starry-forest-slot-tests");
+            if (Directory.Exists(rootPath))
+            {
+                Directory.Delete(rootPath, true);
+            }
+
+            PlayerState state = new PlayerState(ItemCatalog.InventorySlotCount)
+            {
+                BuiltCount = 2
+            };
+            state.Items[ItemId.Wood] = 3;
+            SaveSlotService slotService = new SaveSlotService(new SaveService(), rootPath);
+
+            OperationResult autoSave = slotService.SaveAuto(state);
+            OperationResult deleteAuto = slotService.Delete(SaveSlotService.AutoSlotId);
+            OperationResult manualSave = slotService.SaveManual(state, 1);
+            SaveLoadResult manualLoad = slotService.Load(SaveSlotService.GetManualSlotId(1));
+            OperationResult manualDelete = slotService.DeleteManual(1);
+
+            Assert.IsTrue(autoSave.Success, autoSave.Message);
+            Assert.IsFalse(deleteAuto.Success);
+            Assert.IsTrue(manualSave.Success, manualSave.Message);
+            Assert.IsTrue(manualLoad.Success, manualLoad.Message);
+            Assert.AreEqual(2, manualLoad.State.BuiltCount);
+            Assert.AreEqual(3, manualLoad.State.Items[ItemId.Wood]);
+            Assert.IsTrue(manualDelete.Success, manualDelete.Message);
+            Assert.IsFalse(slotService.Load(SaveSlotService.GetManualSlotId(1)).Success);
+
+            Directory.Delete(rootPath, true);
+        }
     }
 }

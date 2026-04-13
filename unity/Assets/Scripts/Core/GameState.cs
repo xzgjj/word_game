@@ -28,6 +28,7 @@ namespace StarryForest.Core
             WorldNodes = new WorldNodeService(Gather, Fishing, MiniGames, Inventory, Signboard, Builder);
             Time = new TimeService();
             Save = new SaveService();
+            SaveSlots = new SaveSlotService(Save);
             Archives = new ArchiveService();
         }
 
@@ -43,6 +44,7 @@ namespace StarryForest.Core
         public WorldNodeService WorldNodes { get; }
         public TimeService Time { get; }
         public SaveService Save { get; }
+        public SaveSlotService SaveSlots { get; }
         public ArchiveService Archives { get; }
 
         public OperationResult InteractWithWorldNode(string nodeId)
@@ -65,10 +67,18 @@ namespace StarryForest.Core
             SaveLoadResult result = Save.Load(filePath);
             if (result.Success)
             {
-                Player = result.State;
+                ReplacePlayer(result.State);
             }
 
             return result;
+        }
+
+        public void ReplacePlayer(PlayerState playerState)
+        {
+            if (playerState != null)
+            {
+                Player = playerState;
+            }
         }
     }
 }

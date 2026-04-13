@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using StarryForest.Core;
 using StarryForest.Inventory;
+using StarryForest.Save;
 using StarryForest.Signboard;
 using UnityEngine;
 
@@ -70,6 +71,11 @@ namespace StarryForest.Runtime
                 DrawEquipmentWheel();
             }
 
+            if (runner.ShowSystemMenu)
+            {
+                DrawSystemMenu();
+            }
+
             if (runner.ShowArcadeMenu)
             {
                 DrawArcadeMenu();
@@ -89,7 +95,7 @@ namespace StarryForest.Runtime
             GUILayout.Label("星绪森林 视觉可玩版", titleStyle);
             GUILayout.Label(runner.IsMiniGameScene
                 ? "WASD 移动，E 收集贴纸或从出口回家。"
-                : "WASD 移动，E 互动，I 背包，Tab 装备圆环，F5 手动档案。靠近木牌后按 1-5 兑换。", bodyStyle);
+                : "WASD 移动，E 互动，I 背包，Tab 装备圆环，Esc 存档菜单。靠近木牌后按 1-5 兑换。", bodyStyle);
             if (!string.IsNullOrEmpty(runner.CurrentPrompt))
             {
                 GUILayout.Label(runner.CurrentPrompt, hintStyle);
@@ -117,8 +123,8 @@ namespace StarryForest.Runtime
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 12, rect.y + 10, rect.width - 24, rect.height - 20));
             int categoryIndex = Mathf.Clamp(runner.InventoryCategoryIndex, 0, InventoryCategoryNames.Length - 1);
-            GUILayout.Label($"12 格背包  {InventoryCategoryNames[categoryIndex]}", titleStyle);
-            GUILayout.Label("← / → 切换分类", hintStyle);
+            GUILayout.Label($"{ItemCatalog.InventorySlotCount} 格背包  {InventoryCategoryNames[categoryIndex]}", titleStyle);
+            GUILayout.Label("← / → 切换分类，Tab 从装备/室内物品里更换装备", hintStyle);
             List<ItemId> visibleItems = GetVisibleInventoryItems(runner.State, categoryIndex);
             if (visibleItems.Count == 0)
             {
@@ -128,7 +134,10 @@ namespace StarryForest.Runtime
             foreach (ItemId itemId in visibleItems)
             {
                 runner.State.Items.TryGetValue(itemId, out int count);
-                GUILayout.Label($"{GetItemName(itemId)}  {count}", bodyStyle);
+                string equipmentHint = runner.IsEquipped(itemId)
+                    ? "  已装备"
+                    : runner.CanEquip(itemId) ? "  可装备" : string.Empty;
+                GUILayout.Label($"{GetItemName(itemId)}  {count}{equipmentHint}", bodyStyle);
             }
             int discoveredCount = GetVisibleInventoryItems(runner.State).Count;
             int hiddenCount = ItemCatalog.Items.Count - discoveredCount;
@@ -175,15 +184,46 @@ namespace StarryForest.Runtime
 
         private void DrawEquipmentWheel()
         {
-            Rect rect = new Rect((Screen.width - 320) * 0.5f, (Screen.height - 240) * 0.5f, 320, 240);
+            Rect rect = new Rect((Screen.width - 360) * 0.5f, (Screen.height - 280) * 0.5f, 360, 280);
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 16, rect.y + 14, rect.width - 32, rect.height - 28));
             GUILayout.Label("装备圆环", titleStyle);
-            GUILayout.Label("Tab 关闭，数字键选择。", hintStyle);
-            bool ownsAxe = runner.GameState.Inventory.GetCount(runner.State, ItemId.Axe) > 0;
-            GUILayout.Space(16);
-            GUILayout.Label(ownsAxe ? "1. 斧头  可装备" : "1. 斧头  未获得：在木牌用星币购买", bodyStyle);
+            GUILayout.Label("Tab 关闭，数字键选择，Backspace 收起装备。物品来自背包装备/室内分类。", hintStyle);
+            GUILayout.Space(10);
+            IReadOnlyList<ItemId> equipmentItems = runner.EquipmentItems;
+            for (int index = 0; index < equipmentItems.Count; index++)
+            {
+                ItemId itemId = equipmentItems[index];
+                bool ownsItem = runner.GameState.Inventory.GetCount(runner.State, itemId) > 0;
+                string status = runner.IsEquipped(itemId) ? "已装备" : ownsItem ? "可装备" : "未获得";
+                GUILayout.Label($"{index + 1}. {GetItemName(itemId)}  {status}", bodyStyle);
+            }
+
             GUILayout.Label($"当前装备：{GetEquippedItemName(runner.State)}", hintStyle);
+            GUILayout.EndArea();
+        }
+
+        private void DrawSystemMenu()
+        {
+            IReadOnlyList<SaveSlotSnapshot> slots = runner.GameState.SaveSlots.GetSlots();
+            Rect rect = new Rect((Screen.width - 520) * 0.5f, (Screen.height - 340) * 0.5f, 520, 340);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 18, rect.y + 16, rect.width - 36, rect.height - 32));
+            GUILayout.Label("系统菜单", titleStyle);
+            GUILayout.Label("↑ / ↓ 选择存档，S 保存手动档，L 读取，Delete 删除手动档，Q 保存并退出，Esc 返回。", hintStyle);
+            GUILayout.Space(10);
+
+            for (int index = 0; index < slots.Count; index++)
+            {
+                SaveSlotSnapshot slot = slots[index];
+                string cursor = index == runner.SaveMenuSlotIndex ? "> " : "  ";
+                string state = slot.Exists && slot.LastWriteTime.HasValue
+                    ? slot.LastWriteTime.Value.ToString("yyyy-MM-dd HH:mm")
+                    : "空";
+                string lockHint = slot.IsAuto ? "  自动档不可删除" : string.Empty;
+                GUILayout.Label($"{cursor}{slot.Label}  {state}{lockHint}", bodyStyle);
+            }
+
             GUILayout.EndArea();
         }
 

@@ -3,6 +3,7 @@ using System.Linq;
 using StarryForest.Core;
 using StarryForest.MiniGame;
 using StarryForest.Player;
+using StarryForest.Save;
 using StarryForest.Signboard;
 using StarryForest.World.Nodes;
 using UnityEngine;
@@ -16,6 +17,13 @@ namespace StarryForest.Runtime
     {
         private const float MiniGameMoveSpeed = 4.6f;
         private const float AutoArchiveIntervalSeconds = 600f;
+        private static readonly ItemId[] EquipmentRingItems =
+        {
+            ItemId.Axe,
+            ItemId.OldCartridge,
+            ItemId.Sticker
+        };
+
         private static GameStateRunner instance;
 
         private readonly List<WorldNodeInteractor> worldNodes = new List<WorldNodeInteractor>();
@@ -43,7 +51,10 @@ namespace StarryForest.Runtime
         public bool ShowArcadeMenu { get; private set; }
         public bool ShowInventory { get; private set; }
         public bool ShowEquipmentWheel { get; private set; }
+        public bool ShowSystemMenu { get; private set; }
         public int InventoryCategoryIndex { get; private set; }
+        public int SaveMenuSlotIndex { get; private set; }
+        public IReadOnlyList<ItemId> EquipmentItems => EquipmentRingItems;
         public bool IsMiniGameScene => SceneManager.GetActiveScene().name == "MiniGame01";
         public bool CanStartMiniGame => State != null
             && State.KnownSystems.Contains(GameConstants.ArcadeSystemId)
@@ -91,8 +102,13 @@ namespace StarryForest.Runtime
 
             if (WasPressed(keyboard.escapeKey))
             {
-                ShowSignboard = false;
-                ShowArcadeMenu = false;
+                ToggleSystemMenu();
+            }
+
+            if (ShowSystemMenu)
+            {
+                UpdateSystemMenuShortcuts(keyboard);
+                return;
             }
 
             if (IsMiniGameScene)
@@ -209,12 +225,23 @@ namespace StarryForest.Runtime
                     return;
                 }
 
+                if (IsBuildNodeCompleted(CurrentNode.NodeId))
+                {
+                    CurrentPrompt = $"{CurrentNode.DisplayLabel}：{GetCompletedBuildMessage(CurrentNode.NodeId)}";
+                    return;
+                }
+
                 CurrentPrompt = $"{CurrentNode.DisplayLabel}：{GetPromptForNode(CurrentNode)}，按 E";
             }
         }
 
         private string GetPromptForNode(WorldNodeInteractor node)
         {
+            if (IsBuildNodeCompleted(node.NodeId))
+            {
+                return GetCompletedBuildMessage(node.NodeId);
+            }
+
             if (node.NodeId == "flower-bed-slot" || node.NodeId == "forest-flower-bed-slot")
             {
                 int stage = WorldNodeService.GetWorldNodeStage(State, node.NodeId);
@@ -239,7 +266,7 @@ namespace StarryForest.Runtime
         {
             if (WasPressed(keyboard.tKey))
             {
-                SetResult(GameState.Time.CycleNext(State));
+                SetResultAndAutosave(GameState.Time.CycleNext(State));
             }
 
             if (WasPressed(keyboard.iKey))
@@ -262,7 +289,7 @@ namespace StarryForest.Runtime
 
             if (WasPressed(keyboard.f5Key))
             {
-                SetResult(GameState.Archives.CreateArchive(State, "manual", "手动档案"));
+                SetResultAndAutosave(GameState.Archives.CreateArchive(State, "manual", "手动档案"));
             }
 
             if (ShowInventory && WasPressed(keyboard.leftArrowKey))
@@ -309,6 +336,14 @@ namespace StarryForest.Runtime
                 return;
             }
 
+            if (IsBuildNodeCompleted(CurrentNode.NodeId))
+            {
+                SetMessage(GetCompletedBuildMessage(CurrentNode.NodeId));
+                RefreshWorldViews();
+                UpdateNearestNode();
+                return;
+            }
+
             if (CurrentNode.NodeId == "home-signboard")
             {
                 ShowSignboard = true;
@@ -327,8 +362,9 @@ namespace StarryForest.Runtime
                 firstResourceGuideCompleted = true;
             }
 
-            SetResult(result);
+            SetResultAndAutosave(result);
             RefreshWorldViews();
+            UpdateNearestNode();
         }
 
         private void TryExchangeByShortcut(Keyboard keyboard)
@@ -339,7 +375,7 @@ namespace StarryForest.Runtime
             {
                 if (WasPressed(keys[index]))
                 {
-                    SetResult(GameState.Signboard.Exchange(State, recipes[index].Recipe.Id));
+                    SetResultAndAutosave(GameState.Signboard.Exchange(State, recipes[index].Recipe.Id));
                     RefreshWorldViews();
                     return;
                 }
@@ -357,7 +393,7 @@ namespace StarryForest.Runtime
                 {
                     if (WasPressed(sellKeys[index]))
                     {
-                        SetResult(GameState.Signboard.Sell(State, sellIds[index]));
+                        SetResultAndAutosave(GameState.Signboard.Sell(State, sellIds[index]));
                         RefreshWorldViews();
                         return;
                     }
@@ -370,7 +406,7 @@ namespace StarryForest.Runtime
             {
                 if (WasPressed(buyKeys[index]))
                 {
-                    SetResult(GameState.Signboard.Buy(State, buyIds[index]));
+                    SetResultAndAutosave(GameState.Signboard.Buy(State, buyIds[index]));
                     RefreshWorldViews();
                     return;
                 }
@@ -379,26 +415,62 @@ namespace StarryForest.Runtime
 
         private void TryEquipByShortcut(Keyboard keyboard)
         {
-            if (!WasPressed(keyboard.digit1Key))
+            if (WasPressed(keyboard.backspaceKey))
             {
+                State.EquippedItemId = null;
+                ShowEquipmentWheel = false;
+                SetResultAndAutosave(OperationResult.Ok("已收起装备。"));
                 return;
             }
 
-            if (GameState.Inventory.GetCount(State, ItemId.Axe) <= 0)
+            KeyControl[] equipKeys =
             {
-                SetResult(OperationResult.Fail("还没有斧头。先在木牌用星币购买。"));
+                keyboard.digit1Key,
+                keyboard.digit2Key,
+                keyboard.digit3Key,
+                keyboard.digit4Key,
+                keyboard.digit5Key,
+                keyboard.digit6Key,
+                keyboard.digit7Key,
+                keyboard.digit8Key,
+                keyboard.digit9Key
+            };
+
+            for (int index = 0; index < equipKeys.Length && index < EquipmentRingItems.Length; index++)
+            {
+                if (!WasPressed(equipKeys[index]))
+                {
+                    continue;
+                }
+
+                EquipFromInventory(EquipmentRingItems[index]);
+                return;
+            }
+        }
+
+        private void EquipFromInventory(ItemId itemId)
+        {
+            if (!CanEquip(itemId))
+            {
+                SetResult(OperationResult.Fail("这个物品还不能装备。"));
                 return;
             }
 
-            State.EquippedItemId = ItemId.Axe.ToString();
+            if (GameState.Inventory.GetCount(State, itemId) <= 0)
+            {
+                SetResult(OperationResult.Fail($"{GetItemDisplayName(itemId)}还没有获得。先收集或在木牌购买。"));
+                return;
+            }
+
+            State.EquippedItemId = itemId.ToString();
             ShowEquipmentWheel = false;
-            SetResult(OperationResult.Ok("已装备斧头。"));
+            SetResultAndAutosave(OperationResult.Ok($"已装备{GetItemDisplayName(itemId)}。"));
         }
 
         private void StartMiniGameFromArcade()
         {
             OperationResult result = GameState.StartMiniGame(GameConstants.FirstMiniGameId);
-            SetResult(result);
+            SetResultAndAutosave(result);
             if (result.Success)
             {
                 ShowArcadeMenu = false;
@@ -438,8 +510,13 @@ namespace StarryForest.Runtime
 
                 if (Vector3.Distance(miniGamePlayer.position, sticker.transform.position) <= 0.7f)
                 {
-                    SetResult(GameState.MiniGames.CollectSticker(State));
-                    sticker.SetActive(false);
+                    OperationResult result = GameState.MiniGames.CollectSticker(State);
+                    SetResultAndAutosave(result);
+                    if (result.Success)
+                    {
+                        sticker.SetActive(false);
+                    }
+
                     return;
                 }
             }
@@ -453,7 +530,7 @@ namespace StarryForest.Runtime
                 }
 
                 OperationResult result = GameState.FinishMiniGame(new MiniGameResult(GameConstants.FirstMiniGameId, true, GameConstants.MiniGameStickerTarget));
-                SetResult(result);
+                SetResultAndAutosave(result);
                 if (result.Success)
                 {
                     SceneManager.LoadScene("WorldHub", LoadSceneMode.Single);
@@ -479,10 +556,138 @@ namespace StarryForest.Runtime
             arcadeMachineView?.Refresh(State, GameState.Inventory);
         }
 
+        private void ToggleSystemMenu()
+        {
+            if (ShowSystemMenu)
+            {
+                ShowSystemMenu = false;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            ShowSignboard = false;
+            ShowArcadeMenu = false;
+            ShowInventory = false;
+            ShowEquipmentWheel = false;
+            ShowSystemMenu = true;
+            SaveMenuSlotIndex = 0;
+            PlayFeedback(menuClip);
+        }
+
+        private void UpdateSystemMenuShortcuts(Keyboard keyboard)
+        {
+            IReadOnlyList<SaveSlotSnapshot> slots = GameState.SaveSlots.GetSlots();
+            if (slots.Count == 0)
+            {
+                return;
+            }
+
+            SaveMenuSlotIndex = Mathf.Clamp(SaveMenuSlotIndex, 0, slots.Count - 1);
+            if (WasPressed(keyboard.upArrowKey))
+            {
+                SaveMenuSlotIndex = (SaveMenuSlotIndex - 1 + slots.Count) % slots.Count;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            if (WasPressed(keyboard.downArrowKey))
+            {
+                SaveMenuSlotIndex = (SaveMenuSlotIndex + 1) % slots.Count;
+                PlayFeedback(menuClip);
+                return;
+            }
+
+            SaveSlotSnapshot selectedSlot = slots[SaveMenuSlotIndex];
+            if (WasPressed(keyboard.sKey))
+            {
+                SaveSelectedManualSlot(selectedSlot);
+                return;
+            }
+
+            if (WasPressed(keyboard.lKey))
+            {
+                LoadSelectedSlot(selectedSlot);
+                return;
+            }
+
+            if (WasPressed(keyboard.deleteKey) || WasPressed(keyboard.backspaceKey))
+            {
+                DeleteSelectedSlot(selectedSlot);
+                return;
+            }
+
+            if (WasPressed(keyboard.qKey))
+            {
+                OperationResult saveResult = GameState.SaveSlots.SaveAuto(State);
+                SetResult(saveResult.Success ? OperationResult.Ok("已保存并退出。") : saveResult);
+                if (saveResult.Success)
+                {
+                    Application.Quit();
+                }
+            }
+        }
+
+        private void SaveSelectedManualSlot(SaveSlotSnapshot selectedSlot)
+        {
+            if (selectedSlot.IsAuto)
+            {
+                SetResult(OperationResult.Fail("自动保存由系统维护，请选择手动存档槽。"));
+                return;
+            }
+
+            if (!SaveSlotService.TryGetManualSlot(selectedSlot.SlotId, out int manualSlot))
+            {
+                SetResult(OperationResult.Fail("存档槽不存在。"));
+                return;
+            }
+
+            SetResult(GameState.SaveSlots.SaveManual(State, manualSlot));
+        }
+
+        private void LoadSelectedSlot(SaveSlotSnapshot selectedSlot)
+        {
+            SaveLoadResult loadResult = GameState.SaveSlots.Load(selectedSlot.SlotId);
+            if (!loadResult.Success)
+            {
+                SetResult(OperationResult.Fail(loadResult.Message));
+                return;
+            }
+
+            GameState.ReplacePlayer(loadResult.State);
+            ShowSystemMenu = false;
+            autoArchiveTimer = 0f;
+            SetResult(OperationResult.Ok(loadResult.Message));
+            RefreshWorldViews();
+            UpdateNearestNode();
+        }
+
+        private void DeleteSelectedSlot(SaveSlotSnapshot selectedSlot)
+        {
+            SetResult(GameState.SaveSlots.Delete(selectedSlot.SlotId));
+        }
+
+        private void SetResultAndAutosave(OperationResult result)
+        {
+            SetResult(result);
+            if (result.Success)
+            {
+                AutosaveProgress();
+            }
+        }
+
         private void SetResult(OperationResult result)
         {
             SetMessage(result.Message);
             PlayFeedback(result.Success ? successClip : failClip);
+        }
+
+        private void AutosaveProgress()
+        {
+            OperationResult saveResult = GameState.SaveSlots.SaveAuto(State);
+            if (!saveResult.Success)
+            {
+                SetMessage($"{LastMessage}（自动保存失败：{saveResult.Message}）");
+            }
         }
 
         private void SetMessage(string message)
@@ -500,6 +705,7 @@ namespace StarryForest.Runtime
 
             autoArchiveTimer = 0f;
             GameState.Archives.CreateArchive(State, "auto", "10 分钟自动档案");
+            AutosaveProgress();
         }
 
         private void MoveInventoryCategory(int direction)
@@ -554,6 +760,52 @@ namespace StarryForest.Runtime
                 || nodeId == "shallow-river-shell"
                 || nodeId == "river-fish"
                 || nodeId == "shallow-fish";
+        }
+
+        public bool CanEquip(ItemId itemId)
+        {
+            return System.Array.IndexOf(EquipmentRingItems, itemId) >= 0;
+        }
+
+        public bool IsEquipped(ItemId itemId)
+        {
+            return State != null && State.EquippedItemId == itemId.ToString();
+        }
+
+        private bool IsBuildNodeCompleted(string nodeId)
+        {
+            return !string.IsNullOrEmpty(nodeId)
+                && buildPlacementViews.Any(view => view != null && view.NodeId == nodeId && view.IsBuilt(State));
+        }
+
+        private static string GetCompletedBuildMessage(string nodeId)
+        {
+            return nodeId switch
+            {
+                "river-bridge" => "木桥已经修好，可以从桥面过河",
+                "flower-bed-slot" => "花圃已经建好，地块状态已保存",
+                "forest-flower-bed-slot" => "森林花圃已经建好，地块状态已保存",
+                _ => "这里已经完成建设"
+            };
+        }
+
+        private static string GetItemDisplayName(ItemId itemId)
+        {
+            return itemId switch
+            {
+                ItemId.Wood => "木材",
+                ItemId.Stone => "石子",
+                ItemId.FlowerSeed => "花种",
+                ItemId.RiverShell => "河贝",
+                ItemId.Fish => "鱼",
+                ItemId.EmotionShard => "表情碎片",
+                ItemId.StarCoin => "星币",
+                ItemId.OldCartridge => "旧卡带",
+                ItemId.StarCore => "星屑灯芯",
+                ItemId.Sticker => "贴纸",
+                ItemId.Axe => "斧头",
+                _ => itemId.ToString()
+            };
         }
 
         private static Vector2 ReadPlanarInput(Keyboard keyboard, bool includeArrowKeys = true)
