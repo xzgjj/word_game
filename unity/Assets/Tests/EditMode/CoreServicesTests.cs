@@ -3,6 +3,7 @@ using NUnit.Framework;
 using StarryForest.Building;
 using StarryForest.Core;
 using StarryForest.Inventory;
+using StarryForest.Save;
 using StarryForest.Signboard;
 
 namespace StarryForest.Tests.EditMode
@@ -12,7 +13,7 @@ namespace StarryForest.Tests.EditMode
         [Test]
         public void InventorySlotCountUsesItemTypesPlusThree()
         {
-            Assert.AreEqual(12, ItemCatalog.InventorySlotCount);
+            Assert.AreEqual(14, ItemCatalog.InventorySlotCount);
         }
 
         [Test]
@@ -111,6 +112,46 @@ namespace StarryForest.Tests.EditMode
             CollectionAssert.Contains(snapshot.UnlockedBlueprints, BlueprintId.CustomBuilding);
             Assert.IsTrue(snapshot.ExchangeRecipes.Count > 0);
             Assert.IsTrue(snapshot.ExchangeRecipes[0].CanExchange);
+            Assert.IsTrue(snapshot.BuyOffers.Count > 0);
+            Assert.IsTrue(snapshot.SellOffers.Count > 0);
+        }
+
+        [Test]
+        public void SignboardSellCollectiblesForCoinsAndBuyAxe()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            SignboardService signboard = new SignboardService(inventory);
+            inventory.Add(state, ItemId.Fish, 2);
+
+            OperationResult sell = signboard.Sell(state, "sell-fish");
+            OperationResult buyWithoutEnoughCoins = signboard.Buy(state, "buy-axe");
+
+            Assert.IsTrue(sell.Success, sell.Message);
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Fish));
+            Assert.AreEqual(3, inventory.GetCount(state, ItemId.StarCoin));
+            Assert.IsFalse(buyWithoutEnoughCoins.Success);
+            inventory.Add(state, ItemId.StarCoin, 2);
+            OperationResult buy = signboard.Buy(state, "buy-axe");
+
+            Assert.IsTrue(buy.Success, buy.Message);
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Axe));
+            Assert.AreEqual(0, inventory.GetCount(state, ItemId.StarCoin));
+        }
+
+        [Test]
+        public void ArchiveServiceKeepsOnlyTwentyRecords()
+        {
+            PlayerState state = NewState();
+            ArchiveService archiveService = new ArchiveService();
+
+            for (int index = 0; index < 25; index++)
+            {
+                archiveService.CreateArchive(state, "auto", $"自动档案 {index}");
+            }
+
+            Assert.AreEqual(20, state.ArchiveRecords.Count);
+            Assert.AreEqual("自动档案 5", state.ArchiveRecords[0].Label);
         }
 
         [Test]

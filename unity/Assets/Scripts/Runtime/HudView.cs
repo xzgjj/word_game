@@ -13,15 +13,15 @@ namespace StarryForest.Runtime
             "采集",
             "交换/货币",
             "建造种植",
-            "室内/特殊"
+            "装备/室内"
         };
 
         private static readonly ItemId[][] InventoryCategoryItems =
         {
             new[] { ItemId.Wood, ItemId.Stone, ItemId.RiverShell, ItemId.Fish },
-            new[] { ItemId.EmotionShard, ItemId.StarCore, ItemId.Sticker },
+            new[] { ItemId.StarCoin, ItemId.EmotionShard, ItemId.StarCore, ItemId.Sticker },
             new[] { ItemId.FlowerSeed, ItemId.Wood, ItemId.Stone },
-            new[] { ItemId.OldCartridge, ItemId.Sticker }
+            new[] { ItemId.Axe, ItemId.OldCartridge, ItemId.Sticker }
         };
 
         [SerializeField] private GameStateRunner runner;
@@ -65,6 +65,11 @@ namespace StarryForest.Runtime
                 DrawSignboard();
             }
 
+            if (runner.ShowEquipmentWheel)
+            {
+                DrawEquipmentWheel();
+            }
+
             if (runner.ShowArcadeMenu)
             {
                 DrawArcadeMenu();
@@ -84,7 +89,7 @@ namespace StarryForest.Runtime
             GUILayout.Label("星绪森林 视觉可玩版", titleStyle);
             GUILayout.Label(runner.IsMiniGameScene
                 ? "WASD 移动，E 收集贴纸或从出口回家。"
-                : "WASD 移动，E 互动，I 打开/隐藏背包，T 切换时间。靠近木牌后按 1-5 兑换。", bodyStyle);
+                : "WASD 移动，E 互动，I 背包，Tab 装备圆环，F5 手动档案。靠近木牌后按 1-5 兑换。", bodyStyle);
             if (!string.IsNullOrEmpty(runner.CurrentPrompt))
             {
                 GUILayout.Label(runner.CurrentPrompt, hintStyle);
@@ -149,8 +154,36 @@ namespace StarryForest.Runtime
             }
 
             GUILayout.Space(8);
+            GUILayout.Label("星币购买  6 木材 / 7 石子 / 8 花种 / 9 斧头", hintStyle);
+            foreach (CommerceOfferAvailability availability in snapshot.BuyOffers)
+            {
+                GUILayout.Label($"{GetItemName(availability.Offer.ItemId)} x{availability.Offer.ItemCount}  {availability.Offer.CoinCount} 星币  {(availability.CanUse ? "可买" : "星币不足")}", bodyStyle);
+            }
+
+            GUILayout.Label("出售收集物  Shift+1 木材 / Shift+2 石子 / Shift+3 河贝 / Shift+4 鱼", hintStyle);
+            foreach (CommerceOfferAvailability availability in snapshot.SellOffers)
+            {
+                GUILayout.Label($"{GetItemName(availability.Offer.ItemId)} x{availability.Offer.ItemCount}  换 {availability.Offer.CoinCount} 星币  {(availability.CanUse ? "可卖" : "数量不足")}", bodyStyle);
+            }
+
+            GUILayout.Space(8);
             GUILayout.Label($"图纸记录  {string.Join(" / ", snapshot.UnlockedBlueprints)}", bodyStyle);
             GUILayout.Label($"小镇记录  建设 {snapshot.BuiltCount}/3，{(snapshot.CustomBuildUnlocked ? "自建已开启" : "自建未开启")}，贴纸墙 {runner.State.StickerWallCount}", bodyStyle);
+            GUILayout.Label($"档案记录  {runner.State.ArchiveRecords.Count}/20，任务记录预留 {runner.State.QuestRecords.Count}", bodyStyle);
+            GUILayout.EndArea();
+        }
+
+        private void DrawEquipmentWheel()
+        {
+            Rect rect = new Rect((Screen.width - 320) * 0.5f, (Screen.height - 240) * 0.5f, 320, 240);
+            GUI.Box(rect, GUIContent.none, panelStyle);
+            GUILayout.BeginArea(new Rect(rect.x + 16, rect.y + 14, rect.width - 32, rect.height - 28));
+            GUILayout.Label("装备圆环", titleStyle);
+            GUILayout.Label("Tab 关闭，数字键选择。", hintStyle);
+            bool ownsAxe = runner.GameState.Inventory.GetCount(runner.State, ItemId.Axe) > 0;
+            GUILayout.Space(16);
+            GUILayout.Label(ownsAxe ? "1. 斧头  可装备" : "1. 斧头  未获得：在木牌用星币购买", bodyStyle);
+            GUILayout.Label($"当前装备：{GetEquippedItemName(runner.State)}", hintStyle);
             GUILayout.EndArea();
         }
 
@@ -266,11 +299,23 @@ namespace StarryForest.Runtime
                 ItemId.RiverShell => "河贝",
                 ItemId.Fish => "鱼",
                 ItemId.EmotionShard => "表情碎片",
+                ItemId.StarCoin => "星币",
                 ItemId.OldCartridge => "旧卡带",
                 ItemId.StarCore => "星屑灯芯",
                 ItemId.Sticker => "贴纸",
+                ItemId.Axe => "斧头",
                 _ => itemId.ToString()
             };
+        }
+
+        private static string GetEquippedItemName(PlayerState state)
+        {
+            if (string.IsNullOrEmpty(state.EquippedItemId) || !System.Enum.TryParse(state.EquippedItemId, out ItemId itemId))
+            {
+                return "无";
+            }
+
+            return GetItemName(itemId);
         }
     }
 }

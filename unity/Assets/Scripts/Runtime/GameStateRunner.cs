@@ -15,6 +15,7 @@ namespace StarryForest.Runtime
     public sealed class GameStateRunner : MonoBehaviour
     {
         private const float MiniGameMoveSpeed = 4.6f;
+        private const float AutoArchiveIntervalSeconds = 600f;
         private static GameStateRunner instance;
 
         private readonly List<WorldNodeInteractor> worldNodes = new List<WorldNodeInteractor>();
@@ -31,6 +32,7 @@ namespace StarryForest.Runtime
         private AudioClip failClip;
         private AudioClip menuClip;
         private bool firstResourceGuideCompleted;
+        private float autoArchiveTimer;
 
         public GameState GameState { get; private set; }
         public PlayerState State => GameState?.Player;
@@ -40,6 +42,7 @@ namespace StarryForest.Runtime
         public bool ShowSignboard { get; private set; }
         public bool ShowArcadeMenu { get; private set; }
         public bool ShowInventory { get; private set; }
+        public bool ShowEquipmentWheel { get; private set; }
         public int InventoryCategoryIndex { get; private set; }
         public bool IsMiniGameScene => SceneManager.GetActiveScene().name == "MiniGame01";
         public bool CanStartMiniGame => State != null
@@ -94,10 +97,12 @@ namespace StarryForest.Runtime
 
             if (IsMiniGameScene)
             {
+                UpdateAutoArchive();
                 UpdateMiniGame(keyboard);
                 return;
             }
 
+            UpdateAutoArchive();
             UpdateWorldMovement(keyboard);
             UpdateNearestNode();
             UpdateWorldShortcuts(keyboard);
@@ -222,6 +227,11 @@ namespace StarryForest.Runtime
                 };
             }
 
+            if (node.NodeId == "forest-branch" && State.EquippedItemId == ItemId.Axe.ToString())
+            {
+                return "用斧头整理树枝，获得木材";
+            }
+
             return node.Prompt;
         }
 
@@ -238,6 +248,23 @@ namespace StarryForest.Runtime
                 PlayFeedback(menuClip);
             }
 
+            if (WasPressed(keyboard.tabKey))
+            {
+                ShowEquipmentWheel = !ShowEquipmentWheel;
+                PlayFeedback(menuClip);
+            }
+
+            if (ShowEquipmentWheel)
+            {
+                TryEquipByShortcut(keyboard);
+                return;
+            }
+
+            if (WasPressed(keyboard.f5Key))
+            {
+                SetResult(GameState.Archives.CreateArchive(State, "manual", "手动档案"));
+            }
+
             if (ShowInventory && WasPressed(keyboard.leftArrowKey))
             {
                 MoveInventoryCategory(-1);
@@ -252,7 +279,15 @@ namespace StarryForest.Runtime
 
             if (ShowSignboard)
             {
-                TryExchangeByShortcut(keyboard);
+                if (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
+                {
+                    TryCommerceByShortcut(keyboard);
+                }
+                else
+                {
+                    TryExchangeByShortcut(keyboard);
+                    TryCommerceByShortcut(keyboard);
+                }
             }
 
             if (ShowArcadeMenu && WasPressed(keyboard.enterKey))
@@ -309,6 +344,55 @@ namespace StarryForest.Runtime
                     return;
                 }
             }
+        }
+
+        private void TryCommerceByShortcut(Keyboard keyboard)
+        {
+            bool shiftPressed = keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed;
+            KeyControl[] sellKeys = { keyboard.digit1Key, keyboard.digit2Key, keyboard.digit3Key, keyboard.digit4Key };
+            string[] sellIds = { "sell-wood", "sell-stone", "sell-river-shell", "sell-fish" };
+            if (shiftPressed)
+            {
+                for (int index = 0; index < sellKeys.Length; index++)
+                {
+                    if (WasPressed(sellKeys[index]))
+                    {
+                        SetResult(GameState.Signboard.Sell(State, sellIds[index]));
+                        RefreshWorldViews();
+                        return;
+                    }
+                }
+            }
+
+            KeyControl[] buyKeys = { keyboard.digit6Key, keyboard.digit7Key, keyboard.digit8Key, keyboard.digit9Key };
+            string[] buyIds = { "buy-wood", "buy-stone", "buy-flower-seed", "buy-axe" };
+            for (int index = 0; index < buyKeys.Length; index++)
+            {
+                if (WasPressed(buyKeys[index]))
+                {
+                    SetResult(GameState.Signboard.Buy(State, buyIds[index]));
+                    RefreshWorldViews();
+                    return;
+                }
+            }
+        }
+
+        private void TryEquipByShortcut(Keyboard keyboard)
+        {
+            if (!WasPressed(keyboard.digit1Key))
+            {
+                return;
+            }
+
+            if (GameState.Inventory.GetCount(State, ItemId.Axe) <= 0)
+            {
+                SetResult(OperationResult.Fail("还没有斧头。先在木牌用星币购买。"));
+                return;
+            }
+
+            State.EquippedItemId = ItemId.Axe.ToString();
+            ShowEquipmentWheel = false;
+            SetResult(OperationResult.Ok("已装备斧头。"));
         }
 
         private void StartMiniGameFromArcade()
@@ -404,6 +488,18 @@ namespace StarryForest.Runtime
         private void SetMessage(string message)
         {
             LastMessage = message;
+        }
+
+        private void UpdateAutoArchive()
+        {
+            autoArchiveTimer += Time.deltaTime;
+            if (autoArchiveTimer < AutoArchiveIntervalSeconds)
+            {
+                return;
+            }
+
+            autoArchiveTimer = 0f;
+            GameState.Archives.CreateArchive(State, "auto", "10 分钟自动档案");
         }
 
         private void MoveInventoryCategory(int direction)

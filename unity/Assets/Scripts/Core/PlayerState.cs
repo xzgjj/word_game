@@ -17,6 +17,8 @@ namespace StarryForest.Core
             KnownSystems = new HashSet<string>();
             UnlockedMiniGames = new HashSet<string>();
             CompletedMiniGames = new HashSet<string>();
+            ArchiveRecords = new List<ArchiveRecord>();
+            QuestRecords = new List<string>();
         }
 
         public string PositionId { get; set; }
@@ -36,5 +38,8 @@ namespace StarryForest.Core
         public HashSet<string> CompletedMiniGames { get; }
         public int StickerWallCount { get; set; }
         public bool SignboardDailyRewardClaimed { get; set; }
+        public string EquippedItemId { get; set; }
+        public List<ArchiveRecord> ArchiveRecords { get; }
+        public List<string> QuestRecords { get; }
     }
 }

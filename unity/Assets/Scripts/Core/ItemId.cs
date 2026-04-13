@@ -8,8 +8,10 @@ namespace StarryForest.Core
         RiverShell,
         Fish,
         EmotionShard,
+        StarCoin,
         OldCartridge,
         StarCore,
-        Sticker
+        Sticker,
+        Axe
     }
 }

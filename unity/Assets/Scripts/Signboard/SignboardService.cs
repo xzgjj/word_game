@@ -10,6 +10,8 @@ namespace StarryForest.Signboard
         private readonly InventoryService inventoryService;
         private readonly BlueprintService blueprintService;
         private readonly Dictionary<string, ExchangeRecipe> exchangeRecipes;
+        private readonly Dictionary<string, CommerceOffer> buyOffers;
+        private readonly Dictionary<string, CommerceOffer> sellOffers;
 
         public SignboardService(InventoryService inventoryService)
             : this(inventoryService, new BlueprintService())
@@ -80,6 +82,20 @@ namespace StarryForest.Signboard
                         })
                 }
             };
+            buyOffers = new Dictionary<string, CommerceOffer>
+            {
+                { "buy-wood", new CommerceOffer("buy-wood", ItemId.Wood, 1, 2) },
+                { "buy-stone", new CommerceOffer("buy-stone", ItemId.Stone, 1, 2) },
+                { "buy-flower-seed", new CommerceOffer("buy-flower-seed", ItemId.FlowerSeed, 1, 2) },
+                { "buy-axe", new CommerceOffer("buy-axe", ItemId.Axe, 1, 5) }
+            };
+            sellOffers = new Dictionary<string, CommerceOffer>
+            {
+                { "sell-wood", new CommerceOffer("sell-wood", ItemId.Wood, 1, 1) },
+                { "sell-stone", new CommerceOffer("sell-stone", ItemId.Stone, 1, 1) },
+                { "sell-river-shell", new CommerceOffer("sell-river-shell", ItemId.RiverShell, 1, 2) },
+                { "sell-fish", new CommerceOffer("sell-fish", ItemId.Fish, 1, 3) }
+            };
         }
 
         public OperationResult Open(PlayerState state)
@@ -109,10 +125,24 @@ namespace StarryForest.Signboard
                 recipes.Add(new ExchangeRecipeAvailability(recipe, CanExchange(state, recipe.Id)));
             }
 
+            List<CommerceOfferAvailability> buySnapshot = new List<CommerceOfferAvailability>();
+            foreach (CommerceOffer offer in buyOffers.Values)
+            {
+                buySnapshot.Add(new CommerceOfferAvailability(offer, CanBuy(state, offer.Id)));
+            }
+
+            List<CommerceOfferAvailability> sellSnapshot = new List<CommerceOfferAvailability>();
+            foreach (CommerceOffer offer in sellOffers.Values)
+            {
+                sellSnapshot.Add(new CommerceOfferAvailability(offer, CanSell(state, offer.Id)));
+            }
+
             return new SignboardMenuSnapshot(
                 state.BuiltCount,
                 state.CustomBuildUnlocked,
                 recipes,
+                buySnapshot,
+                sellSnapshot,
                 new List<BlueprintId>(state.UnlockedBlueprints));
         }
 
@@ -146,6 +176,50 @@ namespace StarryForest.Signboard
             }
 
             return inventoryService.Add(state, recipe.OutputItemId, recipe.OutputCount);
+        }
+
+        public bool CanBuy(PlayerState state, string offerId)
+        {
+            return buyOffers.TryGetValue(offerId, out CommerceOffer offer)
+                && inventoryService.GetCount(state, ItemId.StarCoin) >= offer.CoinCount;
+        }
+
+        public OperationResult Buy(PlayerState state, string offerId)
+        {
+            if (!buyOffers.TryGetValue(offerId, out CommerceOffer offer))
+            {
+                return OperationResult.Fail("购买条目不存在。");
+            }
+
+            OperationResult spendResult = inventoryService.Spend(state, new Dictionary<ItemId, int> { { ItemId.StarCoin, offer.CoinCount } });
+            if (!spendResult.Success)
+            {
+                return spendResult;
+            }
+
+            return inventoryService.Add(state, offer.ItemId, offer.ItemCount);
+        }
+
+        public bool CanSell(PlayerState state, string offerId)
+        {
+            return sellOffers.TryGetValue(offerId, out CommerceOffer offer)
+                && inventoryService.GetCount(state, offer.ItemId) >= offer.ItemCount;
+        }
+
+        public OperationResult Sell(PlayerState state, string offerId)
+        {
+            if (!sellOffers.TryGetValue(offerId, out CommerceOffer offer))
+            {
+                return OperationResult.Fail("出售条目不存在。");
+            }
+
+            OperationResult spendResult = inventoryService.Spend(state, new Dictionary<ItemId, int> { { offer.ItemId, offer.ItemCount } });
+            if (!spendResult.Success)
+            {
+                return spendResult;
+            }
+
+            return inventoryService.Add(state, ItemId.StarCoin, offer.CoinCount);
         }
     }
 }

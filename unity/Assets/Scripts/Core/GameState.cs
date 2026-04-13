@@ -28,6 +28,7 @@ namespace StarryForest.Core
             WorldNodes = new WorldNodeService(Gather, Fishing, MiniGames, Inventory, Signboard, Builder);
             Time = new TimeService();
             Save = new SaveService();
+            Archives = new ArchiveService();
         }
 
         public PlayerState Player { get; private set; }
@@ -42,6 +43,7 @@ namespace StarryForest.Core
         public WorldNodeService WorldNodes { get; }
         public TimeService Time { get; }
         public SaveService Save { get; }
+        public ArchiveService Archives { get; }
 
         public OperationResult InteractWithWorldNode(string nodeId)
         {

@@ -26,6 +26,7 @@ namespace StarryForest.Tests.EditMode
                 CustomBuildUnlocked = true,
                 StickerWallCount = 1,
                 SignboardDailyRewardClaimed = true,
+                EquippedItemId = ItemId.Axe.ToString(),
                 ActiveMiniGameId = GameConstants.FirstMiniGameId,
                 ActiveMiniGameStickerCount = 2
             };
@@ -40,6 +41,8 @@ namespace StarryForest.Tests.EditMode
             state.KnownSystems.Add(GameConstants.ArcadeSystemId);
             state.UnlockedMiniGames.Add(GameConstants.FirstMiniGameId);
             state.CompletedMiniGames.Add(GameConstants.FirstMiniGameId);
+            state.QuestRecords.Add("reserved-garden-cleanup");
+            state.ArchiveRecords.Add(new ArchiveRecord("manual-1", "manual", "手动档案", "2026-04-13T08:00:00Z", 3, 1, 2));
 
             SaveService saveService = new SaveService();
             OperationResult saveResult = saveService.Save(state, filePath);
@@ -60,6 +63,9 @@ namespace StarryForest.Tests.EditMode
             Assert.IsTrue(loadResult.State.KnownSystems.Contains(GameConstants.ArcadeSystemId));
             Assert.IsTrue(loadResult.State.CompletedMiniGames.Contains(GameConstants.FirstMiniGameId));
             Assert.IsTrue(loadResult.State.SignboardDailyRewardClaimed);
+            Assert.AreEqual(ItemId.Axe.ToString(), loadResult.State.EquippedItemId);
+            Assert.AreEqual("reserved-garden-cleanup", loadResult.State.QuestRecords[0]);
+            Assert.AreEqual("手动档案", loadResult.State.ArchiveRecords[0].Label);
 
             File.Delete(filePath);
         }

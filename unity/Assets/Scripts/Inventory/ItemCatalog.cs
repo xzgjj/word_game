@@ -14,9 +14,11 @@ namespace StarryForest.Inventory
             ItemId.RiverShell,
             ItemId.Fish,
             ItemId.EmotionShard,
+            ItemId.StarCoin,
             ItemId.OldCartridge,
             ItemId.StarCore,
-            ItemId.Sticker
+            ItemId.Sticker,
+            ItemId.Axe
         };
 
         public static IReadOnlyList<ItemId> Items => AllItems;

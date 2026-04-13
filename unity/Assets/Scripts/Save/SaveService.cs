@@ -65,12 +65,15 @@ namespace StarryForest.Save
         public List<string> completedMiniGames = new List<string>();
         public int stickerWallCount;
         public bool signboardDailyRewardClaimed;
+        public string equippedItemId;
+        public List<ArchiveRecordData> archiveRecords = new List<ArchiveRecordData>();
+        public List<string> questRecords = new List<string>();
 
         public static PlayerSaveData FromState(PlayerState state)
         {
             PlayerSaveData data = new PlayerSaveData
             {
-                schemaVersion = 4,
+                schemaVersion = 5,
                 positionId = state.PositionId,
                 emotion = state.Emotion.ToString(),
                 timeOfDay = state.TimeOfDay.ToString(),
@@ -80,7 +83,8 @@ namespace StarryForest.Save
                 builtCount = state.BuiltCount,
                 customBuildUnlocked = state.CustomBuildUnlocked,
                 stickerWallCount = state.StickerWallCount,
-                signboardDailyRewardClaimed = state.SignboardDailyRewardClaimed
+                signboardDailyRewardClaimed = state.SignboardDailyRewardClaimed,
+                equippedItemId = state.EquippedItemId
             };
 
             foreach (KeyValuePair<ItemId, int> item in state.Items)
@@ -106,6 +110,11 @@ namespace StarryForest.Save
             data.knownSystems.AddRange(state.KnownSystems);
             data.unlockedMiniGames.AddRange(state.UnlockedMiniGames);
             data.completedMiniGames.AddRange(state.CompletedMiniGames);
+            data.questRecords.AddRange(state.QuestRecords);
+            foreach (ArchiveRecord archiveRecord in state.ArchiveRecords)
+            {
+                data.archiveRecords.Add(ArchiveRecordData.FromArchiveRecord(archiveRecord));
+            }
 
             return data;
         }
@@ -122,7 +131,8 @@ namespace StarryForest.Save
                 BuiltCount = builtCount,
                 CustomBuildUnlocked = customBuildUnlocked,
                 StickerWallCount = stickerWallCount,
-                SignboardDailyRewardClaimed = signboardDailyRewardClaimed
+                SignboardDailyRewardClaimed = signboardDailyRewardClaimed,
+                EquippedItemId = equippedItemId
             };
 
             foreach (ItemCountData item in items)
@@ -157,6 +167,20 @@ namespace StarryForest.Save
             AddStrings(state.KnownSystems, knownSystems);
             AddStrings(state.UnlockedMiniGames, unlockedMiniGames);
             AddStrings(state.CompletedMiniGames, completedMiniGames);
+            if (questRecords != null)
+            {
+                AddStrings(state.QuestRecords, questRecords);
+            }
+
+            if (archiveRecords == null)
+            {
+                return state;
+            }
+
+            foreach (ArchiveRecordData archiveRecord in archiveRecords)
+            {
+                state.ArchiveRecords.Add(archiveRecord.ToArchiveRecord());
+            }
 
             return state;
         }
@@ -167,6 +191,17 @@ namespace StarryForest.Save
         }
 
         private static void AddStrings(HashSet<string> target, List<string> source)
+        {
+            foreach (string value in source)
+            {
+                if (!string.IsNullOrEmpty(value))
+                {
+                    target.Add(value);
+                }
+            }
+        }
+
+        private static void AddStrings(List<string> target, List<string> source)
         {
             foreach (string value in source)
             {
@@ -190,6 +225,37 @@ namespace StarryForest.Save
     {
         public string nodeId;
         public int stage;
+    }
+
+    [Serializable]
+    public sealed class ArchiveRecordData
+    {
+        public string id;
+        public string source;
+        public string label;
+        public string createdAtUtc;
+        public int builtCount;
+        public int stickerWallCount;
+        public int discoveredItemTypes;
+
+        public static ArchiveRecordData FromArchiveRecord(ArchiveRecord archiveRecord)
+        {
+            return new ArchiveRecordData
+            {
+                id = archiveRecord.Id,
+                source = archiveRecord.Source,
+                label = archiveRecord.Label,
+                createdAtUtc = archiveRecord.CreatedAtUtc,
+                builtCount = archiveRecord.BuiltCount,
+                stickerWallCount = archiveRecord.StickerWallCount,
+                discoveredItemTypes = archiveRecord.DiscoveredItemTypes
+            };
+        }
+
+        public ArchiveRecord ToArchiveRecord()
+        {
+            return new ArchiveRecord(id, source, label, createdAtUtc, builtCount, stickerWallCount, discoveredItemTypes);
+        }
     }
 
     [Serializable]

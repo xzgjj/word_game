@@ -9,17 +9,23 @@ namespace StarryForest.Signboard
             int builtCount,
             bool customBuildUnlocked,
             IReadOnlyList<ExchangeRecipeAvailability> exchangeRecipes,
+            IReadOnlyList<CommerceOfferAvailability> buyOffers,
+            IReadOnlyList<CommerceOfferAvailability> sellOffers,
             IReadOnlyList<BlueprintId> unlockedBlueprints)
         {
             BuiltCount = builtCount;
             CustomBuildUnlocked = customBuildUnlocked;
             ExchangeRecipes = exchangeRecipes;
+            BuyOffers = buyOffers;
+            SellOffers = sellOffers;
             UnlockedBlueprints = unlockedBlueprints;
         }
 
         public int BuiltCount { get; }
         public bool CustomBuildUnlocked { get; }
         public IReadOnlyList<ExchangeRecipeAvailability> ExchangeRecipes { get; }
+        public IReadOnlyList<CommerceOfferAvailability> BuyOffers { get; }
+        public IReadOnlyList<CommerceOfferAvailability> SellOffers { get; }
         public IReadOnlyList<BlueprintId> UnlockedBlueprints { get; }
     }
 
