@@ -49,5 +49,19 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(ItemId.Wood, homeWood);
             Assert.AreEqual(ItemId.RiverShell, shell);
         }
+
+        [Test]
+        public void ResourceRespawnPolicyIsFixedByItemType()
+        {
+            Assert.IsTrue(GameStateRunner.TryGetResourceRespawnSeconds("forest-branch", out float branchSeconds));
+            Assert.IsTrue(GameStateRunner.TryGetResourceRespawnSeconds("home-fallen-branch", out float homeBranchSeconds));
+            Assert.IsTrue(GameStateRunner.TryGetResourceRespawnSeconds("river-fish", out float fishSeconds));
+            Assert.IsTrue(GameStateRunner.TryGetResourceRespawnSeconds("river-stone", out float stoneSeconds));
+            Assert.IsFalse(GameStateRunner.TryGetResourceRespawnSeconds("home-signboard", out _));
+            Assert.AreEqual(branchSeconds, homeBranchSeconds);
+            Assert.AreEqual(45f, branchSeconds);
+            Assert.AreEqual(30f, fishSeconds);
+            Assert.AreEqual(90f, stoneSeconds);
+        }
     }
 }

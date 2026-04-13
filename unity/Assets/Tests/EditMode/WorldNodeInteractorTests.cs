@@ -49,5 +49,19 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual("拾取木材", nearPrompt);
             Assert.AreEqual(string.Empty, farPrompt);
         }
+
+        [Test]
+        public void InactiveInteractorDoesNotReturnPrompt()
+        {
+            GameObject gameObject = new GameObject("test-node");
+            WorldNodeInteractor interactor = gameObject.AddComponent<WorldNodeInteractor>();
+            interactor.Configure("forest-branch", "森林树枝", "拾取木材");
+
+            gameObject.SetActive(false);
+            string prompt = interactor.GetPrompt(Vector3.zero);
+
+            Object.DestroyImmediate(gameObject);
+            Assert.AreEqual(string.Empty, prompt);
+        }
     }
 }

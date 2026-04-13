@@ -33,7 +33,9 @@ namespace StarryForest.World.Nodes
 
         public bool IsInRange(Vector3 playerPosition)
         {
-            return Vector3.Distance(transform.position, playerPosition) <= InteractionRadius;
+            return isActiveAndEnabled
+                && gameObject.activeInHierarchy
+                && Vector3.Distance(transform.position, playerPosition) <= InteractionRadius;
         }
 
         public string GetPrompt(Vector3 playerPosition)

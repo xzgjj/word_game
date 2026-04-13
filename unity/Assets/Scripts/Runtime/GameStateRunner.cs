@@ -39,6 +39,7 @@ namespace StarryForest.Runtime
 
         private readonly List<WorldNodeInteractor> worldNodes = new List<WorldNodeInteractor>();
         private readonly List<GameObject> miniGameStickers = new List<GameObject>();
+        private readonly Dictionary<WorldNodeInteractor, float> resourceRespawnTimers = new Dictionary<WorldNodeInteractor, float>();
         private BuildPlacementView[] buildPlacementViews = new BuildPlacementView[0];
         private ClearingPlotView[] clearingPlotViews = new ClearingPlotView[0];
         private StickerWallView stickerWallView;
@@ -122,6 +123,7 @@ namespace StarryForest.Runtime
             }
 
             UpdateInteractionFeedback();
+            UpdateResourceRespawns();
 
             if (WasPressed(keyboard.escapeKey))
             {
@@ -157,6 +159,7 @@ namespace StarryForest.Runtime
         {
             worldNodes.Clear();
             miniGameStickers.Clear();
+            resourceRespawnTimers.Clear();
             playerController = GameObject.Find("Player")?.GetComponent<PlayerController>();
             miniGamePlayer = GameObject.Find("PixelPlayer")?.transform;
             exitDoor = GameObject.Find("ExitDoor")?.transform;
@@ -399,6 +402,11 @@ namespace StarryForest.Runtime
             OperationResult result = CurrentNode.Interact(GameState);
             SetResultAndAutosave(result, false);
             ShowInteractionFeedbackForResult(CurrentNode, result);
+            if (result.Success)
+            {
+                ScheduleResourceRespawn(CurrentNode);
+            }
+
             RefreshWorldViews();
             UpdateNearestNode();
         }
@@ -906,6 +914,46 @@ namespace StarryForest.Runtime
             interactionFeedbackTimer = Mathf.Max(0f, interactionFeedbackTimer - Time.deltaTime);
         }
 
+        private void ScheduleResourceRespawn(WorldNodeInteractor node)
+        {
+            if (node == null || !TryGetResourceRespawnSeconds(node.NodeId, out float respawnSeconds))
+            {
+                return;
+            }
+
+            resourceRespawnTimers[node] = respawnSeconds;
+            node.gameObject.SetActive(false);
+        }
+
+        private void UpdateResourceRespawns()
+        {
+            if (resourceRespawnTimers.Count == 0)
+            {
+                return;
+            }
+
+            foreach (KeyValuePair<WorldNodeInteractor, float> entry in resourceRespawnTimers.ToList())
+            {
+                WorldNodeInteractor node = entry.Key;
+                if (node == null)
+                {
+                    resourceRespawnTimers.Remove(node);
+                    continue;
+                }
+
+                float remainingSeconds = entry.Value - Time.deltaTime;
+                if (remainingSeconds <= 0f)
+                {
+                    node.gameObject.SetActive(true);
+                    resourceRespawnTimers.Remove(node);
+                }
+                else
+                {
+                    resourceRespawnTimers[node] = remainingSeconds;
+                }
+            }
+        }
+
         private void AutosaveProgress()
         {
             OperationResult saveResult = GameState.SaveSlots.SaveAuto(State);
@@ -1181,6 +1229,31 @@ namespace StarryForest.Runtime
                     itemId = default;
                     return false;
             }
+        }
+
+        public static bool TryGetResourceRespawnSeconds(string nodeId, out float seconds)
+        {
+            if (!TryGetGuideItemForNode(nodeId, out ItemId itemId))
+            {
+                seconds = 0f;
+                return false;
+            }
+
+            seconds = GetResourceRespawnSeconds(itemId);
+            return true;
+        }
+
+        private static float GetResourceRespawnSeconds(ItemId itemId)
+        {
+            return itemId switch
+            {
+                ItemId.Fish => 30f,
+                ItemId.Wood => 45f,
+                ItemId.FlowerSeed => 60f,
+                ItemId.RiverShell => 75f,
+                ItemId.Stone => 90f,
+                _ => 60f
+            };
         }
 
         private static string GetItemGuideSystemId(ItemId itemId)
