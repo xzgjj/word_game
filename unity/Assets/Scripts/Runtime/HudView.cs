@@ -100,7 +100,7 @@ namespace StarryForest.Runtime
             GUILayout.Label("星绪森林 视觉可玩版", titleStyle);
             GUILayout.Label(runner.IsMiniGameScene
                 ? "WASD 移动，E 收集贴纸或从出口回家。"
-                : "WASD 移动，E 互动，I 背包，Tab 装备圆环，Esc 存档菜单。靠近木牌后按 1-5 兑换。", bodyStyle);
+                : "WASD 移动，E 互动，Q 关闭当前交互，I 背包，Tab 装备圆环，Esc 系统菜单。靠近木牌后按 1-5 兑换。", bodyStyle);
             if (!string.IsNullOrEmpty(runner.CurrentPrompt))
             {
                 GUILayout.Label(runner.CurrentPrompt, hintStyle);
@@ -157,7 +157,7 @@ namespace StarryForest.Runtime
             GUI.Box(rect, GUIContent.none, panelStyle);
             GUILayout.BeginArea(new Rect(rect.x + 12, rect.y + 10, rect.width - 24, rect.height - 20));
             GUILayout.Label("木屋前木牌", titleStyle);
-            GUILayout.Label("今日可换  按 1-5 兑换，Esc 关闭", hintStyle);
+            GUILayout.Label("今日可换  按 1-5 兑换，Q 关闭木牌，Esc 打开系统菜单", hintStyle);
 
             int shortcut = 1;
             foreach (ExchangeRecipeAvailability availability in snapshot.ExchangeRecipes)
@@ -318,7 +318,7 @@ namespace StarryForest.Runtime
             GUILayout.Label("空地游戏机", titleStyle);
             GUILayout.Label("游戏机菜单已发现。", bodyStyle);
             GUILayout.Label(runner.CanStartMiniGame ? "按 Enter 进入像素小游戏。" : "旧卡带未就绪：在木牌用河贝 + 鱼兑换。", hintStyle);
-            GUILayout.Label("Esc 关闭菜单。", bodyStyle);
+            GUILayout.Label("Q 关闭菜单，Esc 打开系统菜单。", bodyStyle);
             GUILayout.EndArea();
         }
 

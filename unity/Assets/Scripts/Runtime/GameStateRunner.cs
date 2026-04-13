@@ -331,6 +331,12 @@ namespace StarryForest.Runtime
 
             if (ShowSignboard)
             {
+                if (WasPressed(keyboard.qKey))
+                {
+                    CloseContextPanel("木牌记录已关闭。");
+                    return;
+                }
+
                 if (keyboard.leftShiftKey.isPressed || keyboard.rightShiftKey.isPressed)
                 {
                     TryCommerceByShortcut(keyboard);
@@ -345,6 +351,12 @@ namespace StarryForest.Runtime
             if (ShowArcadeMenu && WasPressed(keyboard.enterKey))
             {
                 StartMiniGameFromArcade();
+            }
+
+            if (ShowArcadeMenu && WasPressed(keyboard.qKey))
+            {
+                CloseContextPanel("游戏机菜单已关闭。");
+                return;
             }
 
             if (WasPressed(keyboard.eKey) || WasMousePrimaryPressed())
@@ -502,6 +514,14 @@ namespace StarryForest.Runtime
                 ShowSignboard = false;
                 SceneManager.LoadScene("MiniGame01", LoadSceneMode.Single);
             }
+        }
+
+        private void CloseContextPanel(string message)
+        {
+            ShowSignboard = false;
+            ShowArcadeMenu = false;
+            SetMessage(message);
+            PlayFeedback(menuClip);
         }
 
         private void UpdateMiniGame(Keyboard keyboard)
