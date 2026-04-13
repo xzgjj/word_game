@@ -55,6 +55,7 @@ namespace StarryForest.Save
         public List<ItemCountData> items = new List<ItemCountData>();
         public List<string> unlockedBlueprints = new List<string>();
         public List<PlacedBuildingData> placedBuildings = new List<PlacedBuildingData>();
+        public List<WorldNodeStageData> worldNodeStages = new List<WorldNodeStageData>();
         public List<string> knownSystems = new List<string>();
         public List<string> unlockedMiniGames = new List<string>();
         public string activeMiniGameId;
@@ -68,7 +69,7 @@ namespace StarryForest.Save
         {
             PlayerSaveData data = new PlayerSaveData
             {
-                schemaVersion = 2,
+                schemaVersion = 3,
                 positionId = state.PositionId,
                 emotion = state.Emotion.ToString(),
                 timeOfDay = state.TimeOfDay.ToString(),
@@ -93,6 +94,11 @@ namespace StarryForest.Save
             foreach (PlacedBuilding building in state.PlacedBuildings)
             {
                 data.placedBuildings.Add(PlacedBuildingData.FromPlacedBuilding(building));
+            }
+
+            foreach (KeyValuePair<string, int> entry in state.WorldNodeStages)
+            {
+                data.worldNodeStages.Add(new WorldNodeStageData { nodeId = entry.Key, stage = entry.Value });
             }
 
             data.knownSystems.AddRange(state.KnownSystems);
@@ -137,6 +143,14 @@ namespace StarryForest.Save
                 state.PlacedBuildings.Add(building.ToPlacedBuilding());
             }
 
+            foreach (WorldNodeStageData nodeStage in worldNodeStages)
+            {
+                if (!string.IsNullOrEmpty(nodeStage.nodeId))
+                {
+                    state.WorldNodeStages[nodeStage.nodeId] = nodeStage.stage;
+                }
+            }
+
             AddStrings(state.KnownSystems, knownSystems);
             AddStrings(state.UnlockedMiniGames, unlockedMiniGames);
             AddStrings(state.CompletedMiniGames, completedMiniGames);
@@ -166,6 +180,13 @@ namespace StarryForest.Save
     {
         public string itemId;
         public int count;
+    }
+
+    [Serializable]
+    public sealed class WorldNodeStageData
+    {
+        public string nodeId;
+        public int stage;
     }
 
     [Serializable]

@@ -136,6 +136,39 @@
 
 
 
+### 阶段 8：Unity 视觉可玩版
+- 任务清单：
+  - 新增 `doc/unity_visual_playable_guide.md`，作为新手打开 Unity、查看资产、运行验证、AI 素材生成、对标审核和 Codex 实现顺序的执行手册。
+  - 新增 `doc/visual_playable_art_direction.md`，确认用户提供的主角图为阶段 8 视觉基准，补齐主角、地图、资产、UI、提示词和验收标准。
+  - 新增 `doc/visual_benchmark_review_stage8.md`，把用户补充的动森/Minecraft 参考图和公开对标研究拆成森林、河流、主角、木屋、游戏机、交互路径和二级验收标准。
+  - 将 `assets/reference/protagonist/aethel_ocean_oracle_protagonist_concept.png` 作为内部概念参考，并在 `assets/licenses/asset_sources.md` 记录来源、用途、SHA256 和发布前复核要求。
+  - 将用户补充的 3 张视觉对标图归档到 `assets/reference/visual-benchmark/`，仅用于内部方法分析，禁止复制参考素材或 UI。
+  - 建立 `Assets/Prefabs/` 与 `Assets/Materials/` 的世界、建设、小游戏目录，先用 Unity 基础几何体和 URP Lit/Emission 材质生成低成本可替换资产。
+  - 升级 `WorldHubSceneBuilder` 和 `WorldHub.unity`，让木屋、木牌、旁友森林、河流、河岸、半损坏/已修复木桥、空地游戏机和不可到达远景光幕在 1080p 截图中一眼可读。
+  - 新增运行态薄视图层：`GameStateRunner`、`PromptView`、`InventoryView`、`SignboardView`、`BuildMenuView`、`BuildPlacementView`、`StickerWallView`、`ArcadeMachineView`。
+  - 让场景反馈从纯数值变成可见变化：采集数字增加、材料不足短提示、建设空位替换成建设物、修桥模型切换、游戏机屏幕发光、贴纸墙显示新增贴纸。
+  - 阶段 8A 操作方式锁定：`WASD/方向键` 移动，`E` 互动，木牌面板 `1-4` 兑换，游戏机菜单 `Enter` 进入像素小游戏，小游戏收齐 3 个贴纸后按 `E` 从出口回家。
+  - 阶段 8B 新增“清理后建设”流程：木屋前或森林边缘的落枝/碎石/杂草先作为可清理障碍，清理后给予基础材料并转换为花圃建设空位；花圃建设仍走 `BuildService` 和可持久化状态。
+  - 保持服务层为唯一业务规则来源，UI 和场景只调用 `GameState`、`WorldNodeService`、`SignboardService`、`BuildService`、`CustomBuildService`、`MiniGameService`。
+  - 每完成一个视图或场景小功能，运行最小测试；阶段完成运行 `tools/run-stage6-validation.ps1`。
+- 验收标准：
+  - 新手按 `doc/unity_visual_playable_guide.md` 能打开 Unity Hub、找到 `Assets/Scenes/WorldHub.unity`、点击 Play、找到 Project/Hierarchy/Inspector/Console，并知道如何查看 Prefab 和材质。
+  - 主角视觉按用户提供概念图落地：长黑发、紫黑服装、羽饰/贝壳点缀、漂浮灵鱼、安静/欢笑/激动三表情可读；阶段 8 可用低模代理体或 Sprite/Card，不要求完整角色建模。
+  - `WorldHub` 截图能明确表达单主地图家园：木屋、木牌、森林、河水、桥、建设空位、游戏机、远景光幕全部可读。
+  - 画面方向吸收动森和星露谷的生活节奏与资源循环方法，但朝 Unity URP 半写实高清低模推进，不复制任何参考游戏素材或 UI。
+  - 12 格物品栏、木牌三块信息、建设菜单和短提示 UI 像生活工具和小镇记录，不像任务列表或后台表格。
+  - 建设成功必须产生场景对象变化；失败分支不扣材料，并有短提示。
+  - 游戏机是发现后的菜单入口，旧卡带满足后玩家自主进入像素小游戏；进入后规则变化为收集 3 个贴纸和出口返回。
+  - 贴纸墙回收可见，完成小游戏后回到主世界能看到贴纸墙变化。
+  - 用户可以不修改代码，直接在 Unity Play Mode 中按推荐体验路径完成“采集 -> 兑换 -> 建设 -> 游戏机 -> 回家展示”的自由探索闭环。
+  - 玩家必须能完成至少 1 条“清理杂草/碎石/落枝 -> 获得基础材料 -> 空地变为可建设花圃 -> 建设花圃”的可见链路；清理前不能直接建设，清理和建设失败均不能错误扣材料。
+  - 阶段 8B 画面升级必须按 `doc/visual_benchmark_review_stage8.md` 二级验收达到 80 分以上：主角辨识度、森林边缘、河流与桥、材料可读性、生活 UI 和电子入口均需通过。
+  - 不引入新技术栈、不新增联网/账号/抽卡/战斗系统、不扩展多个主世界地图。
+  - EditMode、PlayMode、Windows 构建和构建产物启动冒烟均通过。
+  - 按 `doc/unity_visual_playable_guide.md` 的 80 分审核表自评达到 80 分以上，低于 80 分先修视觉和反馈，不新增玩法。
+
+
+
 ## 每 10 分钟 Review 规则
 - Review 玩法：是否仍围绕“小地图闭环”，有没有无意义扩张。
 - Review 单地图：是否仍是一个主世界地图内的系统深度，而不是扩成多个主世界场景。
@@ -196,7 +229,7 @@
 
 
 ## Git 与交付计划
-- 本轮先推送 `main` 分支。
-- 推送 `main` 后切换回 `v1` 分支，并推送同一轮更新。
+- 阶段内实现分支按“实现 -> 最小测试 -> review -> 本地提交 -> 正常推送”的节奏推进。
+- 只有规划 plan 的最终阶段结束 git 需要再次等待用户明确同意；其他中间实现阶段按用户本轮授权正常提交和推送。
 - 远端保持 `git@github.com:xzgjj/word_game.git`。
-- 推送完成后等待用户确认，再开始项目实现。
+- 若网络或 SSH 阻塞导致推送失败，记录失败原因、保留本地提交和分支，不改用破坏性 git 操作。

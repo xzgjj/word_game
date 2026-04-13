@@ -31,6 +31,7 @@ namespace StarryForest.Tests.EditMode
             state.Items[ItemId.Wood] = 5;
             state.Items[ItemId.Sticker] = 3;
             state.UnlockedBlueprints.Add(BlueprintId.CustomBuilding);
+            state.WorldNodeStages["flower-bed-slot"] = 3;
             state.PlacedBuildings.Add(new PlacedBuilding("CustomBuilding-1", BlueprintId.CustomBuilding, 2, 4, 90)
             {
                 CustomData = new CustomBuildingData(CustomBuildingShape.TinyCabin, CustomBuildingTheme.Star, CustomBuildingSize.TwoByTwo)
@@ -52,6 +53,7 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(5, loadResult.State.Items[ItemId.Wood]);
             Assert.AreEqual(3, loadResult.State.Items[ItemId.Sticker]);
             Assert.IsTrue(loadResult.State.UnlockedBlueprints.Contains(BlueprintId.CustomBuilding));
+            Assert.AreEqual(3, loadResult.State.WorldNodeStages["flower-bed-slot"]);
             Assert.AreEqual(1, loadResult.State.PlacedBuildings.Count);
             Assert.AreEqual(CustomBuildingTheme.Star, loadResult.State.PlacedBuildings[0].CustomData.Theme);
             Assert.IsTrue(loadResult.State.KnownSystems.Contains(GameConstants.ArcadeSystemId));

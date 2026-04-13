@@ -324,3 +324,205 @@
   - 记录参考来源：动森取个人岛屿家园与 DIY 资源链，Minecraft 取资源到建设反馈，星穹铁道取星际电子入口和进入后规则变化；未复制画面或素材。
   - Chrome 验证：无控制台错误；脚本闭环结果为建设 3/3、自建已开启、贴纸墙 1、游戏机菜单可自主进入；Lighthouse snapshot Accessibility 83、Best Practices 100。
 - 修改意图：让网页最终概念演示跟随 Unity 已跑通系统表达同一套核心闭环，同时保留对标方法而不复制参考游戏画面。
+
+## 2026-04-13 阶段 8 Unity 视觉可玩版规划
+- 日期/时间：2026-04-13
+- 涉及文件：`doc/unity_visual_playable_guide.md`、`doc/README.md`、`implementation_plan.md`、`notes.txt`、`diff.md`
+- 核心 Diff 摘要：
+  - 新增 Unity 视觉可玩版执行手册，面向没做过游戏的新手和后续 Codex 实现。
+  - 文档细化 Unity Hub 打开项目、查看 Project/Hierarchy/Scene/Game/Inspector/Console、找到场景和资产、运行 Play、使用自动验证脚本的步骤。
+  - 文档补齐 Prefab/Materials 建议目录、主世界视觉升级、生活工具 UI、建设反馈、自建建筑、游戏机入口和像素小游戏的实现顺序。
+  - 文档加入 AI 生成素材提示词模板，包含项目要求关键词，并要求所有素材进入工程前记录许可证和用途。
+  - `implementation_plan.md` 新增阶段 8：Unity 视觉可玩版，明确任务清单、验收标准和 80 分审核要求。
+- 修改意图：让下一阶段能直接从文档进入 Unity 实现和验证，而不是停在抽象建议；同时保证对标只取方法、不复制参考游戏画面。
+
+## 2026-04-13 阶段 8 主角与美术方向确认
+- 日期/时间：2026-04-13
+- 涉及文件：`assets/reference/protagonist/aethel_ocean_oracle_protagonist_concept.png`、`assets/licenses/asset_sources.md`、`assets/reference/visual_reference_sources.md`、`doc/visual_playable_art_direction.md`、`doc/unity_visual_playable_guide.md`、`doc/README.md`、`implementation_plan.md`、`notes.txt`
+- 核心 Diff 摘要：
+  - 将用户提供的主角概念图复制到素材参考目录，记录 SHA256、用途和发布前授权复核要求。
+  - 新增视觉可玩版美术方向文档，确认主角必须保留长黑发、紫黑服装、羽饰/贝壳点缀、漂浮灵鱼和安静/欢笑/激动三表情。
+  - 将动森与星露谷的生活节奏、家园资源循环方法纳入 Unity 视觉升级参考，但明确不复制画面、角色、UI 或素材。
+  - 补齐主世界单地图构图、主角功能映射、资产清单、AI 生成提示词、阶段 8A/8B/8C 实现路线和 100 分验收表。
+  - 更新阶段 8 计划和 Unity 指导文档，使后续实现可直接按主角图、资产清单和验收标准推进。
+- 修改意图：把用户“主角用这一个，其余由实现者补全”的要求转化为可执行的美术、资产、UI 和 Unity 实现标准。
+
+## 2026-04-13 阶段 8A Unity 视觉可玩版实现
+- 日期/时间：2026-04-13
+- 涉及文件：`unity/Assets/Editor/WorldHubSceneBuilder.cs`、`unity/Assets/Scenes/WorldHub.unity`、`unity/Assets/Scenes/MiniGame01.unity`、`unity/Assets/Scripts/Runtime/`、`unity/Assets/Scripts/StarryForest.asmdef`、`unity/Assets/Tests/EditMode/WorldHubSceneTests.cs`、`unity/Assets/Tests/EditMode/MiniGameSceneTests.cs`、`unity/Assets/Tests/PlayMode/SceneSmokeTests.cs`、`doc/unity_visual_playable_guide.md`、`implementation_plan.md`、`notes.txt`
+- 核心 Diff 摘要：
+  - 新增运行态视觉可玩层：`GameStateRunner`、`HudView`、`BuildPlacementView`、`StickerWallView`、`ArcadeMachineView`。
+  - 操作方式落地为 `WASD/方向键` 移动、`E` 互动、木牌 `1-4` 兑换、游戏机菜单 `Enter` 进入小游戏、小游戏 `E` 收集贴纸和回家。
+  - `WorldHubSceneBuilder` 升级主世界：主角代理体包含黑发、紫黑服装、羽饰/贝壳点缀和灵鱼；木屋、木牌、森林、河流、桥、游戏机、远景光幕、贴纸墙和建设空位可读性增强。
+  - 建设成功后通过 `BuildPlacementView` 显示已建设对象，贴纸墙通过 `StickerWallView` 显示小游戏回收成果，游戏机屏幕通过 `ArcadeMachineView` 根据菜单发现/旧卡带状态发光。
+  - `MiniGame01` 升级为可操作的像素贴纸场景，包含 Aethel 像素代理、灵鱼、3 个贴纸和出口门。
+  - 补充 EditMode/PlayMode 场景结构测试，覆盖运行态组件和主角/小游戏视觉代理对象。
+- 验证状态：
+  - Unity 批处理场景生成成功，`stage8-build-worldhub.log` 与 `stage8-build-minigame.log` 显示脚本编译和退出成功，无 C# 编译错误。
+  - `git diff --check` 已通过；Unity 生成场景 YAML 的行尾空格已清理，仅剩仓库 LF/CRLF 提示。
+  - 自动 EditMode 测试当前被已打开的 Unity Editor 项目锁阻塞：`XingxuForestUnity - SampleScene - Windows, Mac, Linux - Unity 6.4` 正在运行。关闭该 Unity 编辑器窗口后需重跑 `tools/run-stage6-validation.ps1`。
+- 修改意图：先把视觉可玩版本做到能打开、能操作、能完成核心闭环，再继续替换更高精资产。
+
+## 2026-04-13 阶段 8B 视觉对标与二级验收补全
+- 日期/时间：2026-04-13
+- 涉及文件：`assets/reference/visual-benchmark/`、`assets/licenses/asset_sources.md`、`assets/reference/visual_reference_sources.md`、`doc/visual_benchmark_review_stage8.md`、`doc/visual_playable_art_direction.md`、`doc/unity_visual_playable_guide.md`、`doc/README.md`、`PROJECT_DIRECTOR_REVIEW_AND_OPTIMIZATION.md`、`implementation_plan.md`、`notes.txt`
+- 核心 Diff 摘要：
+  - 归档用户补充的 3 张视觉对标图：Minecraft 森林/河流构图、动森家/桥/河构图、动森店前空地/角色构图；记录来源、用途和 SHA256。
+  - 新增阶段 8B 视觉对标文档，明确当前阶段 8A 只是功能演示，不是画面完成版。
+  - 将动森、Minecraft、星露谷、星穹铁道的可借鉴方法拆成主角、森林、河流、木屋、游戏机和 UI 的可执行标准。
+  - 细化交互路径：生活采集、兑换建设、游戏机回家展示三条路径，每一步写明状态变化和可见反馈。
+  - 新增二级画面验收和二级交互验收，各 100 分；低于 80 分不能扩展玩法，先修 `WorldHub` 画面。
+- 修改意图：回应用户指出的森林、河流和人物辨识度差距，把抽象“对标参考图”转换为可实现、可 review、可验收的 Unity 场景标准。
+
+## 2026-04-13 暂停前续传检查点
+- 日期/时间：2026-04-13
+- 当前分支：`stage-8-unity-visual-playable-plan`
+- 当前状态：
+  - 用户要求暂停，记录必要信息，后续恢复继续。
+  - Unity 进程已确认无残留。
+  - 中断前 `tools\run-unity-editmode-tests.ps1` 实际生成了 `unity/Logs/editmode-test-results.xml`，结果为 EditMode `46/46 Passed, 0 Failed`。
+  - PlayMode、Windows 构建和启动冒烟尚未在 8B 后继续运行。
+  - `WorldHubSceneBuilder` 已做 8B 代码层调整：主角更有轮廓、森林减少为边缘树群、河流分段并加湿土岸线、木屋增加门/花环/暖光。
+  - `WorldHub.unity` 已通过 `stage8b-build-worldhub.log` 重新生成成功；`MiniGame01.unity` 为阶段 8A 生成版本。
+- 新增用户参考图记录：
+  - `animal_crossing_forest_garden_layout_reference.jpg`：森林花园布局、花丛、树木尺度和装饰旗帜。
+  - `refined_character_silhouette_reference.jpg`：人物精细度、服装层次和形象强化目标。
+  - `animal_crossing_dialog_interaction_reference.webp`：生活化对话/互动气泡参考。
+  - `animal_crossing_terrain_plot_reference.png`：非矩形地形、边界、地块与可建设区域参考。
+  - `animal_crossing_inventory_reference.jpg`：背包圆角容器、图标网格、操作提示参考。
+- 恢复后下一步：
+  - 先读取 `AGENT_EXECUTION_PROTOCOL.md`、`CLAUDE.md`、`implementation_plan.md`、`notes.txt`、`diff.md`、`doc/visual_benchmark_review_stage8.md`。
+  - 继续把新增图 1-5 纳入 `doc/visual_benchmark_review_stage8.md`：森林花园布局、人物形象精细化、动作/互动反馈、背包打开才显示、任务/记录系统口径。
+  - 调研并记录动森动作、背包、地形边界、河流阻挡和简单环境反馈方法；必要时用 Chrome/网页来源辅助。
+  - 实现玩家不能越界、未修桥不能过河、地图非纯长方形边界、背包默认隐藏按键打开、对话/互动气泡、动作反馈最小实现。
+  - 跑 `tools\run-stage6-validation.ps1`，再做 8B 二级验收 review。
+
+## 2026-04-13 新对话续传提示词
+- 日期/时间：2026-04-13
+- 当前分支：`stage-8-unity-visual-playable-plan`
+- 当前要求：
+  - 继续《星绪森林》Unity 视觉可玩版阶段 8B。
+  - Unity 是主实现，网页演示不要更新。
+  - 目标不是复制参考图，而是按动森、Minecraft、星露谷、星穹铁道的方法对标：家园生活、森林花园层次、材料到建设反馈、家门口劳动循环、电子入口规则切换。
+  - 用户已指定主角图为主角方向；后续要提升为“动森式强轮廓 + 更高精细度”的角色代理和 HUD 表情。
+  - 用户补充的参考图已归档到 `assets/reference/visual-benchmark/`，包括森林花园、精细角色、动森对话、地形地块、背包 UI 等。
+  - 当前 8A 已能操作：WASD/方向键移动、E 互动、木牌 1-4 兑换、游戏机 Enter 进入小游戏、小游戏 E 收贴纸/回家；EditMode 46/46 Passed。
+  - 当前 8B 已开始：`WorldHubSceneBuilder` 已改主角轮廓、森林树群、分段河道、湿土岸线、木屋细节，并已重新生成 `WorldHub.unity`。
+  - 还没完成：玩家越界限制、未修桥不能过河、非纯长方形地图边界、背包默认隐藏按键打开、动森式对话/互动气泡、动作反馈、PlayMode/Windows 构建/启动冒烟验证。
+- 新对话提示词：
+
+```text
+你是 Codex，继续接手项目《星绪森林》。项目路径：D:\app_project\game\xiangsu。
+
+先读取并遵守：
+1. AGENT_EXECUTION_PROTOCOL.md
+2. CLAUDE.md
+3. implementation_plan.md
+4. notes.txt
+5. diff.md
+6. doc/visual_playable_art_direction.md
+7. doc/visual_benchmark_review_stage8.md
+8. doc/unity_visual_playable_guide.md
+
+当前分支：stage-8-unity-visual-playable-plan。不要提交，不要推送，除非用户明确同意。
+
+当前目标：继续 Unity 视觉可玩版阶段 8B。Unity 桌面原生版优先，网页概念演示不要更新。目标是让 WorldHub 不只是能操作，而是按用户给的动森/Minecraft/星露谷/星穹铁道参考方法提升到可 review 的视觉水平。
+
+已完成状态：
+- 阶段 8A 已实现 GameStateRunner、HudView、BuildPlacementView、StickerWallView、ArcadeMachineView。
+- WorldHub 已能 WASD/方向键移动、E 互动、T 时间提示、木牌 1-4 兑换、游戏机 Enter 进入 MiniGame01、小游戏 E 收贴纸/回家。
+- 主角方向已确定，参考图已复制到 assets/reference/protagonist/aethel_ocean_oracle_protagonist_concept.png。
+- 用户补充参考图已复制到 assets/reference/visual-benchmark/，用途包括森林花园布局、精细角色轮廓、动森对话互动、非矩形地形地块、动森背包 UI。
+- 中断前 EditMode 测试结果为 46/46 Passed，0 Failed。
+- 8B 代码已开始调整 WorldHubSceneBuilder：主角更有轮廓、森林减少为边缘树群、河流分段并加湿土岸线、木屋增加门/花环/暖光；WorldHub.unity 已重新生成成功。
+
+必须继续完成：
+1. 继续补充 doc/visual_benchmark_review_stage8.md，把新增图 1-5 的设计标准写清楚：森林花园、人物形象、对话互动、背包、任务/记录系统。
+2. 研究并落实动森式动作/交互反馈、背包打开方式、简单环境反馈；只学习方法，不复制素材或 UI。
+3. Unity 实现：
+   - 玩家不能移动到地图外。
+   - 地图边界不能是完整长方形，要做简单非矩形岛屿/围栏/自然边界。
+   - 未修桥前不能过河，修桥后可以通过桥过河。
+   - 背包默认隐藏，按键打开，样式参考动森大圆角容器和图标网格。
+   - 木牌/记录系统像生活记录，不像任务列表。
+   - 增加最小动作/互动反馈：移动、采集、建设、打开菜单、小游戏收贴纸、回家展示。
+4. 跑 tools\run-stage6-validation.ps1，修到 EditMode、PlayMode、Windows 构建和启动冒烟通过。
+5. 做二级 review：画面验收和交互验收均按 doc/visual_benchmark_review_stage8.md 80 分以上标准；不足先修，不新增玩法。
+
+注意：
+- 不要更新网页演示。
+- 不要删除用户素材、配置、锁文件或项目文件。
+- 不要改变技术栈，不要引入战斗、抽卡、联网、账号、多主世界地图。
+- 所有最终提交/推送等待用户确认。
+```
+
+## 2026-04-13 清理后建设花圃补充
+- 日期/时间：2026-04-13
+- 涉及文件：`doc/visual_benchmark_review_stage8.md`、`implementation_plan.md`、`diff.md`、`notes.txt`
+- 核心设计：
+  - 新增阶段 8B 必要行为：玩家先清理木屋前或森林边缘的落枝、杂草、碎石，获得基础材料，再把清理出的空地变成花圃建设空位。
+  - 这条链路吸收动森的资源采集、DIY/建设和岛屿布置方法，星露谷的“过度生长土地 -> 清理 -> 农场/花园空间”方法，Minecraft 的材料到建设反馈方法。
+  - 清理前不能直接建设花圃；清理后显示空地/花圃槽；建设仍调用 `BuildService.Place(FlowerBed)`；失败不扣材料。
+  - 状态需要可持久化，建议新增 `ClearedWorldNodes` 或等价结构并同步 `SaveService`，避免清理只存在于场景临时对象。
+- 新对话提示词补充：
+
+```text
+补充阶段 8B 要求：实现“清理后建设花圃”链路。玩家在木屋前或森林边缘看到被落枝、杂草、碎石占住的花园地块；靠近按 E 分阶段清理，分别获得 wood/stone/flowerSeed，HUD 和场景都要有反馈；清理完成后该点变成 FlowerBedSlot，之后才能调用 BuildService.Place(FlowerBed) 建设花圃。清理前不能直接建设，失败不扣材料，清理状态必须持久化到 PlayerState/SaveService。参考动森的资源采集、DIY/建设和岛屿布置，星露谷的清理过度生长土地并建设农场空间，Minecraft 的材料到建设反馈；只学习方法，不复制素材或 UI。
+```
+
+## 2026-04-13 暂停续传记录
+- 日期/时间：2026-04-13
+- 涉及文件：`notes.txt`、`diff.md`
+- 当前状态：
+  - 用户要求暂停，等额度重置后继续。
+  - 当前无 Unity 进程残留。
+  - `WorldHubSceneBuilder.cs` 已继续按阶段 8B 标准修改森林、河流、主角和木屋锚点，并已重新生成过 `WorldHub.unity`。
+  - `tools/run-unity-editmode-tests.ps1` 启动后被用户中断，EditMode 结果未知。
+- 恢复后第一步：
+  - 读取 `AGENT_EXECUTION_PROTOCOL.md`、`CLAUDE.md`、`implementation_plan.md`、`notes.txt`、`diff.md`。
+  - 确认 Unity 进程为空。
+  - 运行 `tools/run-unity-editmode-tests.ps1`，失败则读取 `unity/Logs/editmode-test.log` 修复。
+- 用户新增待整合要求：
+  - 新增 5 张参考图：`FwiEGF0aAAIT0uG.jpg`、`img_v3_0210n_6dd01027-e1f2-420d-ad10-32b104111fbg.jpg`、`OIP-C.webp`、`PixPin_2026-04-13_10-52-42.png`、`v2-6eacba3eef80a2339fb147bf9269c6be_r.jpg`，本地文件已确认存在但未复制/分析。
+  - 需要补充森林花园布局、人物形象、地图边界/岛屿形状、人物动作交互、未搭桥前不可过河、背包默认关闭、任务/记录 UI、环境反馈的设计标准、验收与实现。
+- 修改意图：保证暂停后恢复不会丢失当前实现状态、未完成测试和新增设计要求。
+
+## 2026-04-13 阶段 8B Unity 实现续跑
+- 日期/时间：2026-04-13
+- 涉及文件：
+  - `unity/Assets/Scripts/Core/PlayerState.cs`
+  - `unity/Assets/Scripts/World/Nodes/WorldNodeService.cs`
+  - `unity/Assets/Scripts/Save/SaveService.cs`
+  - `unity/Assets/Scripts/Player/PlayerController.cs`
+  - `unity/Assets/Scripts/Runtime/GameStateRunner.cs`
+  - `unity/Assets/Scripts/Runtime/HudView.cs`
+  - `unity/Assets/Scripts/Runtime/BuildPlacementView.cs`
+  - `unity/Assets/Scripts/Runtime/ClearingPlotView.cs`
+  - `unity/Assets/Editor/WorldHubSceneBuilder.cs`
+  - `tools/run-unity-scene-builder.ps1`
+  - `tools/run-stage6-validation.ps1`
+  - `doc/visual_benchmark_review_stage8.md`
+  - `doc/unity_visual_playable_guide.md`
+  - `implementation_plan.md`
+- 变更摘要：
+  - 增加 `PlayerState.WorldNodeStages`，用 `SaveService` 序列化为 `worldNodeStages`，保证清理阶段可持久化。
+  - `WorldNodeService` 对 `flower-bed-slot` 与 `forest-flower-bed-slot` 执行三段清理：落枝 -> 木材、碎石 -> 石子、杂草 -> 花种；清理满 3 阶后才走 `BuildService.Place(FlowerBed)`。
+  - 新增 `ClearingPlotView`，把清理阶段映射到落枝/碎石/杂草/清理后土地区块的可见切换。
+  - `BuildPlacementView` 改为可绑定具体网格，避免两个花圃槽因为同一个 `BlueprintId.FlowerBed` 同时显示已建。
+  - `PlayerController` 增加非矩形岛屿边界钳制和河流跨越限制：未修桥不能过河，修桥后只允许桥附近过河。
+  - `HudView` 背包默认隐藏，按 `I` 开关；保留三表情 HUD 文案和生活记录口径。
+  - `WorldHubSceneBuilder` 改成非单一矩形草地组合，并生成木屋前/森林边缘两个清理后建设花圃点。
+  - 新增场景生成脚本并接入 Stage 6 验证，确保跑测试/构建前先重建 Unity 场景。
+- 最小测试：
+  - `tools\run-unity-scene-builder.ps1`：通过；`scene-builder.log` 无 C# warning/error。
+  - `tools\run-unity-editmode-tests.ps1`：48/48 passed，0 failed。
+  - `tools\run-unity-playmode-tests.ps1`：2/2 passed，0 failed。
+  - `tools\run-stage6-validation.ps1`：通过；场景重建、EditMode 50/50、PlayMode 2/2、Windows x64 构建和启动冒烟均成功。
+  - `git diff --check`：通过；仅保留 CRLF 提示。
+- 验证脚本修正：
+  - 连续 Unity BatchMode 调用会短时间占用项目锁，已在 `run-stage6-validation.ps1` 的场景生成、EditMode、PlayMode、Windows 构建之间加入等待。
+  - Unity 批处理会把 `UnityConnectSettings.asset` Services 开关临时改为开启；按离线桌面原型口径已改回关闭，不作为功能变更。
+- 约束：
+  - 网页概念演示未更新。
+  - 未引入战斗、抽卡、联网、账号或多主世界地图。
+  - 用户修正 git 口径：规划 plan 最终阶段结束的 git 需要再次同意；其他阶段正常推送。

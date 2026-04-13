@@ -1,5 +1,6 @@
 using NUnit.Framework;
 using StarryForest.Player;
+using StarryForest.Runtime;
 using StarryForest.World.Nodes;
 using UnityEditor.SceneManagement;
 using UnityEngine;
@@ -37,11 +38,31 @@ namespace StarryForest.Tests.EditMode
             AssertNode("RiverFishNode", "river-fish");
             AssertNode("DamagedBridge", "river-bridge");
             AssertNode("FlowerBedSlot", "flower-bed-slot");
+            AssertNode("ForestFlowerBedSlot", "forest-flower-bed-slot");
             AssertNode("ForestSignSlot", "forest-sign-slot");
             AssertNode("RiverLampSlot", "river-lamp-slot");
             AssertNode("ArcadeMachine", "clearing-arcade");
             AssertNode("ArcadeBaseSlot", "arcade-base-slot");
             Assert.IsNotNull(GameObject.Find("Player").GetComponent<PlayerController>());
+        }
+
+        [Test]
+        public void WorldHubSceneContainsVisualPlayableRuntimeViews()
+        {
+            EditorSceneManager.OpenScene(ScenePath);
+
+            Assert.IsNotNull(GameObject.Find("GameStateRunner").GetComponent<GameStateRunner>());
+            Assert.IsNotNull(GameObject.Find("GameStateRunner").GetComponent<HudView>());
+            Assert.IsNotNull(GameObject.Find("DamagedBridge").GetComponent<BuildPlacementView>());
+            Assert.IsNotNull(GameObject.Find("FlowerBedSlot").GetComponent<BuildPlacementView>());
+            Assert.IsNotNull(GameObject.Find("FlowerBedSlot").GetComponent<ClearingPlotView>());
+            Assert.IsNotNull(GameObject.Find("ForestFlowerBedSlot").GetComponent<ClearingPlotView>());
+            Assert.IsNotNull(GameObject.Find("StickerWall").GetComponent<StickerWallView>());
+            Assert.IsNotNull(GameObject.Find("ArcadeMachine").GetComponent<ArcadeMachineView>());
+            Assert.IsNotNull(GameObject.Find("PlayerBody_AethelProxy"));
+            Assert.IsNotNull(GameObject.Find("SpiritFish_Quiet"));
+            Assert.IsNotNull(GameObject.Find("IslandHomeLobe"));
+            Assert.IsNotNull(GameObject.Find("NaturalBoundary_EastFence"));
         }
 
         private static void AssertNode(string objectName, string nodeId)

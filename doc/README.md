@@ -10,5 +10,8 @@
 - `visual_alignment_standard.md`
 - `unity_newbie_guide.md`
 - `asset_pipeline.md`
+- `unity_visual_playable_guide.md`
+- `visual_playable_art_direction.md`
+- `visual_benchmark_review_stage8.md`
 
 需要把某份详细文档上传 git 时，先和用户确认。

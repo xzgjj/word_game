@@ -13,6 +13,7 @@ namespace StarryForest.Core
             Items = new Dictionary<ItemId, int>();
             UnlockedBlueprints = new HashSet<BlueprintId>();
             PlacedBuildings = new List<PlacedBuilding>();
+            WorldNodeStages = new Dictionary<string, int>();
             KnownSystems = new HashSet<string>();
             UnlockedMiniGames = new HashSet<string>();
             CompletedMiniGames = new HashSet<string>();
@@ -25,6 +26,7 @@ namespace StarryForest.Core
         public Dictionary<ItemId, int> Items { get; }
         public HashSet<BlueprintId> UnlockedBlueprints { get; }
         public List<PlacedBuilding> PlacedBuildings { get; }
+        public Dictionary<string, int> WorldNodeStages { get; }
         public HashSet<string> KnownSystems { get; }
         public HashSet<string> UnlockedMiniGames { get; }
         public string ActiveMiniGameId { get; set; }

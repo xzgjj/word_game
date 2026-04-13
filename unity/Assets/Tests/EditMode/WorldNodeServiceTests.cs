@@ -94,6 +94,59 @@ namespace StarryForest.Tests.EditMode
             Assert.AreEqual(BlueprintId.Bridge, state.PlacedBuildings[0].BlueprintId);
         }
 
+        [Test]
+        public void FlowerBedSlotRequiresThreeClearingStepsBeforeBuilding()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            BlueprintService blueprints = new BlueprintService();
+            WorldNodeService worldNodes = NewWorldNodeService(inventory, blueprints);
+            blueprints.GrantInitialBlueprints(state);
+
+            OperationResult first = worldNodes.Interact(state, "flower-bed-slot");
+            OperationResult second = worldNodes.Interact(state, "flower-bed-slot");
+            OperationResult third = worldNodes.Interact(state, "flower-bed-slot");
+
+            Assert.IsTrue(first.Success, first.Message);
+            Assert.IsTrue(second.Success, second.Message);
+            Assert.IsTrue(third.Success, third.Message);
+            Assert.AreEqual(3, WorldNodeService.GetWorldNodeStage(state, "flower-bed-slot"));
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Wood));
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Stone));
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.FlowerSeed));
+            Assert.AreEqual(0, state.BuiltCount);
+
+            OperationResult buildAttempt = worldNodes.Interact(state, "flower-bed-slot");
+
+            Assert.IsFalse(buildAttempt.Success);
+            Assert.AreEqual(0, state.BuiltCount);
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.Stone));
+            Assert.AreEqual(1, inventory.GetCount(state, ItemId.FlowerSeed));
+        }
+
+        [Test]
+        public void ClearedFlowerBedSlotBuildsAfterMaterialsAreAvailable()
+        {
+            PlayerState state = NewState();
+            InventoryService inventory = new InventoryService();
+            BlueprintService blueprints = new BlueprintService();
+            WorldNodeService worldNodes = NewWorldNodeService(inventory, blueprints);
+            blueprints.GrantInitialBlueprints(state);
+
+            worldNodes.Interact(state, "forest-flower-bed-slot");
+            worldNodes.Interact(state, "forest-flower-bed-slot");
+            worldNodes.Interact(state, "forest-flower-bed-slot");
+            inventory.Add(state, ItemId.FlowerSeed, 1);
+
+            OperationResult result = worldNodes.Interact(state, "forest-flower-bed-slot");
+
+            Assert.IsTrue(result.Success, result.Message);
+            Assert.AreEqual(1, state.BuiltCount);
+            Assert.AreEqual(BlueprintId.FlowerBed, state.PlacedBuildings[0].BlueprintId);
+            Assert.AreEqual(2, state.PlacedBuildings[0].GridX);
+            Assert.AreEqual(3, state.PlacedBuildings[0].GridY);
+        }
+
         private static WorldNodeService NewWorldNodeService(InventoryService inventory, BlueprintService blueprints = null)
         {
             BlueprintService blueprintService = blueprints ?? new BlueprintService();
@@ -101,6 +154,7 @@ namespace StarryForest.Tests.EditMode
                 new GatherService(inventory),
                 new FishingService(inventory),
                 new MiniGameService(inventory),
+                inventory,
                 new SignboardService(inventory, blueprintService),
                 new BuildService(inventory, blueprintService));
         }

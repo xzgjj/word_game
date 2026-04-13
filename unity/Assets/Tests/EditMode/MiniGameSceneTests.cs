@@ -1,4 +1,5 @@
 using NUnit.Framework;
+using StarryForest.Runtime;
 using UnityEditor.SceneManagement;
 using UnityEngine;
 
@@ -18,6 +19,16 @@ namespace StarryForest.Tests.EditMode
             Assert.IsNotNull(GameObject.Find("Sticker_2"));
             Assert.IsNotNull(GameObject.Find("Sticker_3"));
             Assert.IsNotNull(GameObject.Find("ExitDoor"));
+        }
+
+        [Test]
+        public void MiniGameSceneContainsRuntimeAndAethelPixelProxy()
+        {
+            EditorSceneManager.OpenScene(ScenePath);
+
+            Assert.IsNotNull(GameObject.Find("GameStateRunner").GetComponent<GameStateRunner>());
+            Assert.IsNotNull(GameObject.Find("PixelPlayer_Hair"));
+            Assert.IsNotNull(GameObject.Find("PixelSpiritFish"));
         }
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using NUnit.Framework;
 using StarryForest.Player;
+using StarryForest.Runtime;
 using StarryForest.World.Nodes;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -21,6 +22,8 @@ namespace StarryForest.Tests.PlayMode
 
             AssertNode("HomeSignboard", "home-signboard");
             AssertNode("ArcadeMachine", "clearing-arcade");
+            Assert.IsNotNull(GameObject.Find("GameStateRunner")?.GetComponent<GameStateRunner>());
+            Assert.IsNotNull(GameObject.Find("StickerWall")?.GetComponent<StickerWallView>());
             Assert.IsNotNull(GameObject.Find("DistantLightScreen_Unreachable"));
         }
 
